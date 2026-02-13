@@ -1,5 +1,0 @@
-
-flask==3.0.0
-werkzeug==3.0.1
-flask-wtf==1.2.1
-flask-socketio==5.6.0

@@ -187,6 +187,37 @@ def browse_events():
     
     return render_template('user_event_detail.html', events=events)
 
+@events_bp.route('/admin-browse')
+@login_required
+def admin_view_events():
+    """
+    Admin view of browse events - renders admin_view_events.html
+    Same as browse_events but uses different template
+    """
+    conn = get_db_connection()
+    
+    date_col = SCHEMA['date_column']
+    creator_col = SCHEMA['creator_column']
+    
+    # Build query based on schema
+    status_filter = 'AND (e.status = "approved" OR e.status IS NULL)' if SCHEMA['has_status'] else ''
+    
+    query = f'''
+        SELECT e.*, u.full_name as creator_name,
+               (SELECT COUNT(*) FROM event_registrations WHERE event_id = e.id) as participant_count,
+               (SELECT COUNT(*) FROM event_registrations WHERE event_id = e.id AND user_id = ?) as user_registered
+        FROM events e
+        LEFT JOIN users u ON e.{creator_col} = u.id
+        WHERE e.{date_col} >= datetime("now")
+        {status_filter}
+        ORDER BY e.{date_col} ASC
+    '''
+    
+    events = conn.execute(query, (session['user_id'],)).fetchall()
+    conn.close()
+    
+    return render_template('admin_view_events.html', events=events)
+
 @events_bp.route('/calendar')
 @login_required
 def view_calendar():

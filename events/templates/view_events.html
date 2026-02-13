@@ -3,19 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BridgeGen - Events</title>
+    <title>Events - BridgeGen</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         :root { --primary-color: #5b5FEF; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { min-height: 100vh; display: flex; flex-direction: column; background: #F5F5F5; }
-        header { display: flex; align-items: center; justify-content: space-between; padding: 15px 40px; background: white; border-bottom: 1px solid #eee; height: 70px;}
-        .logo { font-size: 24px; color: var(--primary-color); }
-        .nav-links { display: flex; gap: 30px; }
-        .nav-links a { text-decoration: none; color: #444; font-weight: 500; font-size: 14px; }
-        .nav-links a:hover, .nav-links a.active { color: var(--primary-color); }
         
+        /* HEADER - Full navigation */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 40px;
+            background: white;
+            border-bottom: 1px solid #eee;
+            height: 70px;
+            gap: 20px;
+        }
+        .logo { font-size: 24px; color: var(--primary-color); }
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        .nav-links a {
+            text-decoration: none;
+            color: #444;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        .nav-links a:hover { color: var(--primary-color); }
+        
+        /* 3 CONTAINERS LAYOUT */
         .container { background: white; padding: 60px; max-width: 1400px; margin: 40px auto; border-radius: 10px; }
         .dashboard-title { text-align: center; font-size: 32px; font-weight: 600; margin-bottom: 60px; color: #333; }
         .cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; max-width: 1200px; margin: 0 auto; }
@@ -26,21 +48,54 @@
     </style>
 </head>
 <body>
-<header style="display: flex; align-items: center; justify-content: space-between; padding: 15px 40px; background: white; border-bottom: 1px solid #eee; height: 70px;">
-    <div style="font-size: 24px; color: #5b5FEF;">
-        <a href="/" style="color:inherit; text-decoration:none;">
-            <i class="fa-solid fa-asterisk"></i>
-        </a>
-    </div>
-    <nav style="display: flex; gap: 30px;">
-        <a href="/" style="text-decoration: none; color: #444; font-weight: 500; font-size: 14px;">Home</a>
-        <a href="/messaging/home" style="text-decoration: none; color: #444; font-weight: 500; font-size: 14px;">Messaging</a>
-        <a href="/stories" style="text-decoration: none; color: #444; font-weight: 500; font-size: 14px;">LazarusStories</a>
-        <a href="/events/list" style="text-decoration: none; color: #5b5FEF; font-weight: 500; font-size: 14px;">Events</a>
-        <a href="/community" style="text-decoration: none; color: #444; font-weight: 500; font-size: 14px;">Community</a>
-    </nav>
-    <div style="width: 50px;"></div>
-</header>
+    <header>
+        <div class="logo">
+            <a href="/" style="color:inherit; text-decoration:none;">
+                <i class="fa-solid fa-asterisk"></i>
+            </a>
+        </div>
+        
+        <!-- Search Box -->
+        <div class="input-group input-group-sm" style="width: 200px; margin-left: 20px;">
+            <span class="input-group-text bg-light border-0">
+                <i class="fa-solid fa-search text-muted"></i>
+            </span>
+            <input type="text" class="form-control bg-light border-0" placeholder="Search">
+        </div>
+        
+        <nav class="nav-links">
+            <a href="/">Home</a>
+            <a href="/messaging/home">Messaging</a>
+            <a href="/stories">LazarusStories</a>
+            <a href="/events/list" style="color: var(--primary-color);">Events</a>
+            <a href="/community">Community</a>
+            {% if session.user_type == 'moderator' %}
+                <a href="/stories/gamification/admin">Badges</a>
+            {% else %}
+                <a href="/stories/gamification/catalog">Badges</a>
+            {% endif %}
+        </nav>
+        
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <a href="#" style="text-decoration: none; color: #444; font-size: 14px;">FAQ</a>
+            
+            {% if session.user_id %}
+                {% if session.user_type == 'moderator' %}
+                    <a href="/moderator/dashboard" class="btn btn-outline-secondary btn-sm px-3 d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-shield"></i> {{ session.full_name or 'staff' }}
+                    </a>
+                {% else %}
+                    <a href="/profile" class="btn btn-outline-secondary btn-sm px-3 d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-user"></i> {{ session.full_name or 'User' }}
+                    </a>
+                {% endif %}
+                
+                <a href="/logout" class="btn btn-outline-danger btn-sm px-3">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </a>
+            {% endif %}
+        </div>
+    </header>
 
     <div class="container">
         {% if session.user_type == 'moderator' %}
@@ -49,7 +104,7 @@
                 <a href="{{ url_for('events.manage_events') }}" class="dashboard-card">
                     <div class="card-button">Manage Events</div>
                 </a>
-                <a href="{{ url_for('events.browse_events') }}" class="dashboard-card">
+                <a href="{{ url_for('events.admin_view_events') }}" class="dashboard-card">
                     <div class="card-button">Join Events</div>
                 </a>
                 <a href="{{ url_for('events.view_calendar') }}" class="dashboard-card">
@@ -59,7 +114,7 @@
         {% else %}
             <div class="dashboard-title">Events Dashboard</div>
             <div class="cards-grid two-cols">
-                <a href="{{ url_for('events.browse_events') }}" class="dashboard-card">
+                <a href="{{ url_for('events.admin_view_events') }}" class="dashboard-card">
                     <div class="card-button">Join Events</div>
                 </a>
                 <a href="{{ url_for('events.view_calendar') }}" class="dashboard-card">
@@ -68,5 +123,7 @@
             </div>
         {% endif %}
     </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

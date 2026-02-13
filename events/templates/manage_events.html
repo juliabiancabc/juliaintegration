@@ -3,34 +3,378 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BridgeGen - Events</title>
+    <title>Manage Events - BridgeGen</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <style>
         :root { --primary-color: #5b5FEF; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { min-height: 100vh; display: flex; flex-direction: column; }
-        header { display: flex; align-items: center; justify-content: space-between; padding: 15px 40px; background: white; border-bottom: 1px solid #eee; height: 70px;}
+        body { min-height: 100vh; display: flex; flex-direction: column; background: white; }
+        
+        /* HEADER - Full navigation */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 40px;
+            background: white;
+            border-bottom: 1px solid #eee;
+            height: 70px;
+            gap: 20px;
+        }
         .logo { font-size: 24px; color: var(--primary-color); }
-        .nav-links { display: flex; gap: 30px; }
-        .nav-links a { text-decoration: none; color: #444; font-weight: 500; font-size: 14px; }
-        .nav-links a:hover, .nav-links a.active { color: var(--primary-color); }
-
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        .nav-links a {
+            text-decoration: none;
+            color: #444;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        .nav-links a:hover { color: var(--primary-color); }
+        
+        /* PAGE LAYOUT */
+        .page-layout { display: flex; min-height: calc(100vh - 70px); }
+        .sidebar { width: 200px; background: #5B4FE9; padding: 30px 20px; }
+        .sidebar-title { color: white; font-size: 14px; margin-bottom: 20px; font-weight: 600; }
+        .sidebar-item { color: white; padding: 10px 12px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 13px; text-decoration: none; }
+        .sidebar-item.active { background: rgba(255,255,255,0.2); }
+        .sidebar-item:hover { background: rgba(255,255,255,0.1); }
+        .main-area { flex: 1; padding: 30px 40px; background: white; }
+        .header { font-size: 22px; font-weight: 600; margin-bottom: 25px; color: #5B4FE9; display: flex; align-items: center; gap: 15px; }
+        .back-btn { font-size: 24px; color: #5B4FE9; text-decoration: none; cursor: pointer; }
+        .toolbar { display: flex; gap: 15px; margin-bottom: 25px; align-items: center; flex-wrap: wrap; }
+        .new-event-btn { background: #5B4FE9; color: white; padding: 8px 18px; border: none; border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
+        .export-btn { background: #28a745; color: white; padding: 8px 18px; border: none; border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
+        .search-box { padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; width: 200px; font-size: 13px; }
+        .filter-dropdown { padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; background: white; }
+        .section-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .section-label { font-size: 16px; font-weight: 600; }
+        .legend { display: flex; gap: 20px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; }
+        .dot-blue { background: #5B4FE9; }
+        .dot-yellow { background: #FFC107; }
+        .dot-gray { background: #9E9E9E; }
+        .events-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .event-card { background: white; border: 1px solid #E0E0E0; border-radius: 10px; overflow: hidden; transition: transform 0.2s; }
+        .event-card:hover { transform: translateY(-4px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .event-img { height: 140px; background: #E8E8E8; display: flex; align-items: center; justify-content: center; color: #999; font-size: 12px; }
+        .event-img img { width: 100%; height: 100%; object-fit: cover; }
+        .event-body { padding: 16px; }
+        .event-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+        .spaces { font-size: 12px; color: #666; margin-bottom: 12px; }
+        .event-info { font-size: 11px; color: #666; margin-bottom: 3px; }
+        .view-btn { width: 100%; padding: 8px; background: white; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; font-size: 12px; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; color: inherit; }
+        .view-btn:hover { background: #F8F9FF; border-color: #5B4FE9; }
+        .signups-btn { width: 100%; padding: 8px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .signups-btn:hover { background: #218838; }
+        
+        /* MODAL */
+        .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+        .modal-content { background-color: white; margin: 5% auto; padding: 0; border-radius: 10px; width: 80%; max-width: 900px; max-height: 80vh; display: flex; flex-direction: column; }
+        .modal-header { padding: 20px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; }
+        .modal-title { font-size: 18px; font-weight: 600; color: #5B4FE9; }
+        .close { color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; line-height: 20px; }
+        .close:hover { color: #000; }
+        .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+        .modal-footer { padding: 15px 20px; border-top: 1px solid #ddd; display: flex; gap: 10px; justify-content: flex-end; }
+        .registrations-table { width: 100%; border-collapse: collapse; }
+        .registrations-table th { background: #f5f5f5; padding: 12px; text-align: left; font-size: 12px; font-weight: 600; border-bottom: 2px solid #ddd; }
+        .registrations-table td { padding: 12px; font-size: 12px; border-bottom: 1px solid #eee; }
+        .registrations-table tr:hover { background: #f9f9f9; }
+        .no-registrations { text-align: center; padding: 40px; color: #999; }
+        .unregister-btn { background: #dc3545; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; }
+        .unregister-btn:hover { background: #c82333; }
     </style>
 </head>
 <body>
     <header>
-        <div class="logo"><a href="/" style="color:inherit; text-decoration:none;"><i class="fa-solid fa-asterisk"></i></a></div>
+        <div class="logo">
+            <a href="/" style="color:inherit; text-decoration:none;">
+                <i class="fa-solid fa-asterisk"></i>
+            </a>
+        </div>
+        
+        <div class="input-group input-group-sm" style="width: 200px; margin-left: 20px;">
+            <span class="input-group-text bg-light border-0">
+                <i class="fa-solid fa-search text-muted"></i>
+            </span>
+            <input type="text" class="form-control bg-light border-0" placeholder="Search">
+        </div>
+        
         <nav class="nav-links">
             <a href="/">Home</a>
-            <a href="/messaging">Messaging</a>
+            <a href="/messaging/home">Messaging</a>
             <a href="/stories">LazarusStories</a>
-            <a href="/events" class="active">Events</a>
+            <a href="/events/list" style="color: var(--primary-color);">Events</a>
             <a href="/community">Community</a>
+            {% if session.user_type == 'moderator' %}
+                <a href="/stories/gamification/admin">Badges</a>
+            {% else %}
+                <a href="/stories/gamification/catalog">Badges</a>
+            {% endif %}
         </nav>
-        <div style="width: 50px;"></div>
+        
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <a href="#" style="text-decoration: none; color: #444; font-size: 14px;">FAQ</a>
+            
+            {% if session.user_id %}
+                {% if session.user_type == 'moderator' %}
+                    <a href="/moderator/dashboard" class="btn btn-outline-secondary btn-sm px-3 d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-shield"></i> {{ session.full_name or 'staff' }}
+                    </a>
+                {% else %}
+                    <a href="/profile" class="btn btn-outline-secondary btn-sm px-3 d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-user"></i> {{ session.full_name or 'User' }}
+                    </a>
+                {% endif %}
+                
+                <a href="/logout" class="btn btn-outline-danger btn-sm px-3">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </a>
+            {% endif %}
+        </div>
     </header>
 
+    <div class="page-layout">
+        <div class="sidebar">
+            <div class="sidebar-title">Event Navigation</div>
+            <a href="{{ url_for('events.manage_events') }}" class="sidebar-item active">
+                <span>📋</span>
+                <span>Manage Events</span>
+            </a>
+            <a href="{{ url_for('events.attendee_insights') }}" class="sidebar-item">
+                <span>📊</span>
+                <span>Attendee Insights</span>
+            </a>
+        </div>
 
+        <div class="main-area">
+            <div class="header">
+                <a href="{{ url_for('events.view_events') }}" class="back-btn">←</a>
+                <span>Event Management Section</span>
+            </div>
+            
+            <div class="toolbar">
+                <a href="{{ url_for('events.create_event') }}" class="new-event-btn">
+                    <span>+</span>
+                    <span>New Event</span>
+                </a>
+                <a href="{{ url_for('events.export_events') }}" class="export-btn">
+                    <span>📥</span>
+                    <span>Export to Excel</span>
+                </a>
+                <input type="text" class="search-box" placeholder="Search events..." id="searchBox" onkeyup="filterEvents()">
+                <select class="filter-dropdown" id="typeFilter" onchange="filterEvents()">
+                    <option value="all">All Types</option>
+                    <option value="physical">Physical</option>
+                    <option value="virtual">Virtual</option>
+                    <option value="closed">Closed</option>
+                </select>
+                <select class="filter-dropdown" id="sortFilter" onchange="sortEvents()" style="margin-left: auto;">
+                    <option value="latest">Latest Events</option>
+                    <option value="oldest">Oldest Events</option>
+                </select>
+            </div>
+
+            <div class="section-bar">
+                <div class="section-label">All Events</div>
+                <div class="legend">
+                    <div class="legend-item"><div class="dot dot-blue"></div><span>Virtual</span></div>
+                    <div class="legend-item"><div class="dot dot-yellow"></div><span>Physical</span></div>
+                    <div class="legend-item"><div class="dot dot-gray"></div><span>Closed Events</span></div>
+                </div>
+            </div>
+
+            {% if events %}
+            <div class="events-grid">
+                {% for event in events %}
+                <div class="event-card" data-date="{{ event.date.strftime('%Y-%m-%d') }}" data-type="{{ event.event_type }}">
+                    <div class="event-img">
+                        {% if event.image_filename %}
+                        <img src="{{ url_for('static', filename='uploads/' + event.image_filename) }}">
+                        {% else %}
+                        Event Image
+                        {% endif %}
+                    </div>
+                    <div class="event-body">
+                        <div class="event-title">
+                            {% if event.event_type == 'virtual' %}
+                                <div class="dot dot-blue"></div>
+                            {% elif event.is_closed %}
+                                <div class="dot dot-gray"></div>
+                            {% else %}
+                                <div class="dot dot-yellow"></div>
+                            {% endif %}
+                            <span class="event-title-text">{{ event.title }}</span>
+                        </div>
+                        <div class="spaces">
+                            📅 {{ event.available_capacity or event.seat_amount }}/{{ event.seat_amount }} spaces left
+                        </div>
+                        <div class="event-info event-venue">Venue: {{ event.location }}</div>
+                        <div class="event-info event-date">Date: {{ event.date.strftime('%d %B %Y') }}</div>
+                        <div class="event-info event-time">Time: {{ event.date.strftime('%I:%M%p') }}</div>
+                        <a href="{{ url_for('events.view_event_detail', event_id=event.id) }}" class="view-btn">
+                            <span>👁</span><span>View</span>
+                        </a>
+                        <button class="signups-btn" onclick="showRegistrations({{ event.id }}, '{{ event.title }}')">
+                            <span>👥</span><span>Current Sign-ups</span>
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 60px; color: #999;">
+                <div style="font-size: 48px; margin-bottom: 15px;">🔭</div>
+                <h3>No Events Yet</h3>
+                <p>Create your first event!</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Registration Modal -->
+    <div id="registrationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Registrations</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <p>Loading...</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    function filterEvents() {
+        const search = document.getElementById('searchBox').value.toLowerCase();
+        const typeFilter = document.getElementById('typeFilter').value;
+        const cards = document.querySelectorAll('.event-card');
+
+        cards.forEach(card => {
+            const title = card.querySelector('.event-title-text');
+            const venue = card.querySelector('.event-venue');
+            
+            if (!title || !venue) return;
+            
+            const titleText = title.textContent.toLowerCase();
+            const venueText = venue.textContent.toLowerCase();
+            const eventType = card.getAttribute('data-type');
+
+            const matchesSearch = titleText.includes(search) || venueText.includes(search);
+            const matchesType = typeFilter === 'all' || typeFilter === eventType;
+
+            card.style.display = (matchesSearch && matchesType) ? 'block' : 'none';
+        });
+    }
+
+    function sortEvents() {
+        const sortBy = document.getElementById('sortFilter').value;
+        const grid = document.querySelector('.events-grid');
+        const cards = Array.from(document.querySelectorAll('.event-card'));
+
+        if (!grid || cards.length === 0) return;
+
+        cards.sort((a, b) => {
+            const dateA = new Date(a.getAttribute('data-date'));
+            const dateB = new Date(b.getAttribute('data-date'));
+
+            if (sortBy === 'latest') {
+                return dateB - dateA;
+            } else {
+                return dateA - dateB;
+            }
+        });
+
+        grid.innerHTML = '';
+        cards.forEach(card => grid.appendChild(card));
+    }
+
+    function showRegistrations(eventId, eventTitle) {
+        const modal = document.getElementById('registrationModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+        
+        modalTitle.textContent = `Registrations for "${eventTitle}"`;
+        modalBody.innerHTML = '<p>Loading registrations...</p>';
+        modal.style.display = 'block';
+        
+        // Fetch registrations
+        fetch(`/events/registrations/${eventId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.registrations && data.registrations.length > 0) {
+                    let html = `
+                        <table class="registrations-table">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Special Requests</th>
+                                    <th>Registered At</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    data.registrations.forEach(reg => {
+                        html += `
+                            <tr>
+                                <td>${reg.user_name || 'User'}</td>
+                                <td>${reg.special_requests || '-'}</td>
+                                <td>${reg.registered_at}</td>
+                                <td>
+                                    <button class="unregister-btn" onclick="unregisterUser(${eventId}, ${reg.user_id})">
+                                        Unregister
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    html += '</tbody></table>';
+                    modalBody.innerHTML = html;
+                } else {
+                    modalBody.innerHTML = '<div class="no-registrations">No registrations yet</div>';
+                }
+            })
+            .catch(error => {
+                modalBody.innerHTML = '<div class="no-registrations">Error loading registrations</div>';
+            });
+    }
+
+    function closeModal() {
+        document.getElementById('registrationModal').style.display = 'none';
+    }
+
+    function unregisterUser(eventId, userId) {
+        if (confirm('Are you sure you want to unregister this user?')) {
+            // Send unregister request
+            fetch(`/events/unregister/${eventId}/${userId}`, { method: 'POST' })
+                .then(() => {
+                    // Refresh the registrations list
+                    location.reload();
+                });
+        }
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('registrationModal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+    </script>
 </body>
 </html>

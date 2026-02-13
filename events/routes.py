@@ -20,7 +20,7 @@ DATABASE = 'bridgegen.db'
 
 def get_db_connection():
     """Establishes and returns a connection to the SQLite database."""
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(DATABASE, detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -553,6 +553,39 @@ def my_events():
     conn.close()
     
     return render_template('user_event_detail.html', events=events, my_events=True)
+
+@events_bp.route('/detail/<int:event_id>')
+@login_required
+def user_event_detail(event_id):
+    """
+    View single event details
+    """
+    conn = get_db_connection()
+    
+    date_col = SCHEMA['date_column']
+    creator_col = SCHEMA['creator_column']
+    
+    # Get event details
+    query = f'''
+        SELECT e.*, u.full_name as creator_name,
+               (SELECT COUNT(*) FROM event_registrations WHERE event_id = e.id) as participant_count,
+               (SELECT COUNT(*) FROM event_registrations WHERE event_id = e.id AND user_id = ?) as user_registered
+        FROM events e
+        LEFT JOIN users u ON e.{creator_col} = u.id
+        WHERE e.id = ?
+    '''
+    
+    event = conn.execute(query, (session['user_id'], event_id)).fetchone()
+    conn.close()
+    
+    if not event:
+        flash('Event not found.', 'danger')
+        return redirect(url_for('events.browse_events'))
+    
+    # Calculate available capacity
+    available_capacity = (event['seat_amount'] or 0) - event['participant_count']
+    
+    return render_template('user_event_detail.html', event=event, is_registered=event['user_registered'] > 0, available_capacity=available_capacity)
 
 # ==================== MODERATOR ROUTES ====================
 

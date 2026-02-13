@@ -1,0 +1,64 @@
+{% extends 'stories_base.html' %}
+{% block title %}View Flagged Posts and Stories{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 900px;">
+    <!-- Header -->
+    <div class="d-flex align-items-center mb-4">
+        <a href="{{ url_for('stories.mod_manage_posts') }}" class="text-dark me-3" style="font-size: 1.5rem;">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <h4 class="fw-bold mb-0">View Flagged Posts and Stories</h4>
+            <small class="text-muted">{{ admin_name }}</small>
+        </div>
+    </div>
+
+    {% if flagged_stories %}
+    <div class="card border rounded-3 shadow-sm">
+        <div class="card-body p-0">
+            {% for story in flagged_stories %}
+            <div class="d-flex align-items-center justify-content-between p-3 {% if not loop.last %}border-bottom{% endif %}">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-3" 
+                         style="width: 45px; height: 45px;">
+                        <i class="bi bi-person" style="font-size: 1.2rem; color: #9ca3af;"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-semibold mb-0">{{ story.caption or 'Untitled Post' }}</h6>
+                        <small class="text-muted">{{ story.flag_reason or 'Flagged for inappropriate content' }}</small>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <a href="{{ url_for('stories.view_story', story_id=story.id) }}" 
+                       class="btn btn-sm btn-outline-primary" title="View">
+                        <i class="bi bi-eye"></i>
+                    </a>
+                    <form method="POST" action="{{ url_for('stories.mod_unflag_post', story_id=story.id) }}" 
+                          class="d-inline" onsubmit="return confirm('Unflag this post?');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-sm btn-outline-success" title="Unflag">
+                            <i class="bi bi-check-lg"></i>
+                        </button>
+                    </form>
+                    <form method="POST" action="{{ url_for('stories.mod_remove_post', story_id=story.id) }}" 
+                          class="d-inline" onsubmit="return confirm('Are you sure you want to delete this post?');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
+        <h5 class="mt-3 text-muted">No flagged posts</h5>
+        <p class="text-muted">All content looks good!</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

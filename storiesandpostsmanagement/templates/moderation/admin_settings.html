@@ -1,0 +1,46 @@
+{% extends 'stories_base.html' %}
+{% block title %}Admin Settings{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 700px;">
+    <!-- Header -->
+    <div class="d-flex align-items-center mb-4">
+        <a href="{{ url_for('moderator_dashboard') }}" class="text-dark me-3" style="font-size: 1.5rem;">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <h4 class="fw-bold mb-0">Admin Settings</h4>
+            <small class="text-muted">{{ admin_name }}</small>
+        </div>
+    </div>
+
+    <!-- Settings Cards -->
+    <div class="card border rounded-3 shadow-sm">
+        <div class="card-body p-0">
+            <!-- Flagged Posts and Stories -->
+            <a href="{{ url_for('stories.mod_flagged_posts') }}" class="d-flex align-items-center p-4 text-decoration-none text-dark border-bottom">
+                <div class="rounded-3 p-3 me-3" style="background-color: #f3e8ff;">
+                    <i class="bi bi-people-fill" style="font-size: 1.5rem; color: #9333ea;"></i>
+                </div>
+                <h6 class="fw-semibold mb-0">Flagged Posts and Stories</h6>
+            </a>
+
+            <!-- Create Badges -->
+            <a href="{{ url_for('stories.gamification.admin_badges_create') }}" class="d-flex align-items-center p-4 text-decoration-none text-dark border-bottom">
+                <div class="rounded-3 p-3 me-3" style="background-color: #ecfdf5;">
+                    <i class="bi bi-plus-circle-fill" style="font-size: 1.5rem; color: #059669;"></i>
+                </div>
+                <h6 class="fw-semibold mb-0">Create Badges</h6>
+            </a>
+
+            <!-- Delete Badges -->
+            <a href="{{ url_for('stories.gamification.admin_badges_list') }}" class="d-flex align-items-center p-4 text-decoration-none text-dark">
+                <div class="rounded-3 p-3 me-3" style="background-color: #fef2f2;">
+                    <i class="bi bi-trash-fill" style="font-size: 1.5rem; color: #dc2626;"></i>
+                </div>
+                <h6 class="fw-semibold mb-0">Delete Badges</h6>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

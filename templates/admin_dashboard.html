@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<style>
+    body { background: #F5F5F5 !important; }
+    .container { background: white !important; padding: 60px !important; max-width: 1400px !important; margin: 0 auto !important; }
+    .dashboard-title { text-align: center; font-size: 32px; font-weight: 600; margin-bottom: 60px; color: #333; }
+    .cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; max-width: 1200px; margin: 0 auto; }
+    .dashboard-card { background: #E0E0E0; border-radius: 15px; padding: 80px 40px; text-align: center; transition: all 0.3s; cursor: pointer; text-decoration: none; display: block; }
+    .dashboard-card:hover { transform: translateY(-10px); box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+    .card-button { background: white; color: #333; padding: 12px 30px; border-radius: 8px; display: inline-block; margin-top: 40px; font-weight: 500; }
+</style>
+
+<div class="dashboard-title">Admin/Moderator Main</div>
+
+<div class="cards-grid">
+    <a href="{{ url_for('manage_events') }}" class="dashboard-card">
+        <div class="card-button">Manage Events</div>
+    </a>
+    
+    <a href="{{ url_for('view_events') }}" class="dashboard-card">
+        <div class="card-button">Join Events</div>
+    </a>
+    
+    <a href="{{ url_for('view_calendar') }}" class="dashboard-card">
+        <div class="card-button">View Calendar</div>
+    </a>
+</div>
+{% endblock %}

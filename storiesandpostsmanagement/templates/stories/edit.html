@@ -1,0 +1,222 @@
+{% extends 'stories_base.html' %}
+
+{% block title %}Edit Story - LazarusStories{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- back button -->
+    <a href="{{ url_for('stories.view_story', story_id=story.id) }}" class="btn btn-link text-dark p-0 mb-3">
+        <i class="bi bi-arrow-left-circle fs-4"></i>
+    </a>
+
+    <!-- page title -->
+    <h2 class="text-primary mb-4">Edit Story / Post</h2>
+
+    <!-- edit lock notice -->
+    {% if not is_editable %}
+    <div class="alert alert-warning d-flex align-items-center mb-4">
+        <i class="bi bi-lock me-2"></i>
+        <div>
+            <strong>Caption and description are locked.</strong>
+            Stories can only be fully edited within 24 hours of creation.
+            You can still update tags, category, privacy settings, and add media.
+        </div>
+    </div>
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data" id="editStoryForm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="row">
+            <!-- left column - media -->
+            <div class="col-lg-4 mb-4">
+                <!-- existing media -->
+                {% if story.media_paths and story.media_paths|length > 0 %}
+                <div class="existing-media mb-3">
+                    <label class="form-label fw-medium">Current Media</label>
+                    <div class="d-flex gap-2 flex-wrap">
+                        {% for media_path in story.media_paths %}
+                        <div class="existing-media-item">
+                            <img src="{{ url_for('stories.static', filename=media_path) }}" alt="Media">
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- add new media -->
+                <div class="media-upload-area" id="mediaUploadArea">
+                    <input type="file" name="media" id="mediaInput" multiple accept="image/*,video/*" class="d-none">
+                    <div class="upload-placeholder" id="uploadPlaceholder">
+                        <i class="bi bi-plus-lg fs-3 text-muted"></i>
+                        <small class="text-muted d-block mt-2">Add more media</small>
+                    </div>
+                    <div class="media-preview" id="mediaPreview"></div>
+                </div>
+                {% if errors.media %}
+                <div class="text-danger small mt-2">{{ errors.media }}</div>
+                {% endif %}
+            </div>
+
+            <!-- form fields -->
+            <div class="col-lg-8">
+                <div class="row mb-4">
+                    <!-- update buttons -->
+                    <div class="col-12 text-end mb-3">
+                        <button type="submit" class="btn btn-warning px-5 text-white">Update</button>
+                    </div>
+
+                    <!-- captions -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-medium">
+                            Captions
+                            {% if not is_editable %}<i class="bi bi-lock text-muted ms-1"></i>{% endif %}
+                        </label>
+                        <div class="input-group">
+                            <input type="text" name="caption"
+                                class="form-control {% if errors.caption %}is-invalid{% endif %}"
+                                value="{{ story.caption }}" maxlength="120" {% if not is_editable %}readonly{% endif %}>
+                            <span class="input-group-text bg-white">
+                                <i class="bi bi-pencil text-muted"></i>
+                            </span>
+                        </div>
+                        {% if errors.caption %}
+                        <div class="text-danger small mt-1">{{ errors.caption }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- visibility function -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-medium">Visible to:</label>
+                        <div class="input-group">
+                            <select name="privacy" class="form-select {% if errors.privacy %}is-invalid{% endif %}">
+                                {% for option in privacy_options %}
+                                <option value="{{ option }}" {% if story.privacy==option %}selected{% endif %}>
+                                    {{ option }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <span class="input-group-text bg-white">
+                                <i class="bi bi-pencil text-muted"></i>
+                            </span>
+                        </div>
+                        {% if errors.privacy %}
+                        <div class="text-danger small mt-1">{{ errors.privacy }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- tags -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-medium">Tags</label>
+                        <div class="input-group">
+                            <input type="text" name="tags"
+                                class="form-control {% if errors.tags %}is-invalid{% endif %}" placeholder="#helping"
+                                value="{{ story.tags|join(' ') }}">
+                            <span class="input-group-text bg-white">
+                                <i class="bi bi-geo-alt text-muted"></i>
+                            </span>
+                        </div>
+                        {% if errors.tags %}
+                        <div class="text-danger small mt-1">{{ errors.tags }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- category -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-medium">Category</label>
+                        <select name="category" class="form-select {% if errors.category %}is-invalid{% endif %}">
+                            {% for cat in categories %}
+                            <option value="{{ cat }}" {% if story.category==cat %}selected{% endif %}>
+                                {{ cat }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        {% if errors.category %}
+                        <div class="text-danger small mt-1">{{ errors.category }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- allowed groups (conditional) -->
+                    <div class="col-md-6 mb-3 {% if story.privacy != 'Specific Groups' %}d-none{% endif %}"
+                        id="allowedGroupsWrapper">
+                        <label class="form-label fw-medium">Allowed Groups</label>
+                        <input type="text" name="allowed_groups"
+                            class="form-control {% if errors.allowed_groups %}is-invalid{% endif %}"
+                            placeholder="Group1, Group2, ..." value="{{ story.allowed_groups|join(', ') }}">
+                        {% if errors.allowed_groups %}
+                        <div class="text-danger small mt-1">{{ errors.allowed_groups }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- story description -->
+                <div class="mb-4">
+                    <label class="form-label fw-medium">
+                        Story Description
+                        {% if not is_editable %}<i class="bi bi-lock text-muted ms-1"></i>{% endif %}
+                    </label>
+                    <textarea name="description" class="form-control {% if errors.description %}is-invalid{% endif %}"
+                        rows="6" {% if not is_editable %}readonly{% endif %}>{{ story.description }}</textarea>
+                    {% if errors.description %}
+                    <div class="text-danger small mt-1">{{ errors.description }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- timestamps info -->
+                <div class="text-muted small">
+                    <p class="mb-1"><strong>Created:</strong> {{ story.created_at }}</p>
+                    <p class="mb-0"><strong>Last updated:</strong> {{ story.updated_at }}</p>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // handle privacy dropdown to show/hide allowed groups
+    const privacySelect = document.querySelector('select[name="privacy"]');
+    const allowedGroupsWrapper = document.getElementById('allowedGroupsWrapper');
+
+    function toggleAllowedGroups() {
+        if (privacySelect.value === 'Specific Groups') {
+            allowedGroupsWrapper.classList.remove('d-none');
+        } else {
+            allowedGroupsWrapper.classList.add('d-none');
+        }
+    }
+
+    privacySelect.addEventListener('change', toggleAllowedGroups);
+
+    // handle media upload preview
+    const mediaUploadArea = document.getElementById('mediaUploadArea');
+    const mediaInput = document.getElementById('mediaInput');
+    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+    const mediaPreview = document.getElementById('mediaPreview');
+
+    mediaUploadArea.addEventListener('click', () => mediaInput.click());
+
+    mediaInput.addEventListener('change', function () {
+        mediaPreview.innerHTML = '';
+
+        if (this.files.length > 0) {
+            uploadPlaceholder.style.display = 'none';
+
+            Array.from(this.files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    if (file.type.startsWith('image/')) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'preview-item';
+                        mediaPreview.appendChild(img);
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+        } else {
+            uploadPlaceholder.style.display = 'flex';
+        }
+    });
+</script>
+{% endblock %}

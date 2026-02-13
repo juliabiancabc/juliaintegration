@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Complete Registration{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card-custom">
+                <a href="{{ url_for('register') }}" class="text-decoration-none mb-3 d-inline-block">
+                    <i class="fas fa-arrow-left"></i> Back to account selection
+                </a>
+                <div class="text-center mb-4">
+                    <div class="mb-3">
+                        {% if account_type == 'youth' %}
+                            <i class="fas fa-user fa-4x" style="color: #667eea;"></i>
+                            <h3 class="mt-2">Welcome Youth!</h3>
+                            <p>Ages 13-25</p>
+                        {% elif account_type == 'senior' %}
+                            <i class="fas fa-users fa-4x" style="color: #a855f7;"></i>
+                            <h3 class="mt-2">Welcome Senior!</h3>
+                            <p>Ages 60+</p>
+                        {% else %}
+                            <i class="fas fa-shield-alt fa-4x" style="color: #f97316;"></i>
+                            <h3 class="mt-2">Moderator Access</h3>
+                            <p>Staff verification required</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <form method="POST" id="registerForm">
+                    {% if account_type == 'youth' %}
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fab fa-instagram"></i> Login with Instagram</label>
+                            <input type="email" class="form-control" name="email" placeholder="Enter your email" required>
+                        </div>
+                    {% elif account_type == 'senior' %}
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-phone"></i> Phone Number</label>
+                            <input type="tel" class="form-control" name="phone" placeholder="+65 9123 4567" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email (optional)</label>
+                            <input type="email" class="form-control" name="email" placeholder="your.email@example.com">
+                        </div>
+                    {% else %}
+                        <div class="mb-3">
+                            <label class="form-label">16-Digit Moderator Key</label>
+                            <input type="text" class="form-control" name="moderator_key" placeholder="XXXX XXXX XXXX XXXX" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone Number Verification</label>
+                            <input type="tel" class="form-control" name="phone" placeholder="+65 9123 4567" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" name="email" placeholder="staff@bridgegen.com" required>
+                        </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label class="form-label">Full Name *</label>
+                        <input type="text" class="form-control" name="full_name" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Age *</label>
+                        <input type="number" class="form-control" name="age" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Password *</label>
+                        <input type="password" class="form-control" name="password" minlength="6" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Confirm Password *</label>
+                        <input type="password" class="form-control" name="confirm_password" minlength="6" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary-custom w-100 py-2">
+                        <i class="fas fa-check"></i> Complete Registration
+                    </button>
+
+                    <div class="text-center mt-3">
+                        <small>Already have an account? <a href="{{ url_for('login') }}">Sign in</a></small>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+    const password = document.querySelector('[name="password"]').value;
+    const confirmPassword = document.querySelector('[name="confirm_password"]').value;
+    
+    if (password !== confirmPassword) {
+        e.preventDefault();
+        alert('Passwords do not match!');
+    }
+});
+</script>
+{% endblock %}

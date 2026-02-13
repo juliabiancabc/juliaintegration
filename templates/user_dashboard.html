@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Events{% endblock %}
+{% block content %}
+<style>
+    .dashboard-header { text-align: center; margin-bottom: 50px; }
+    .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 40px; }
+    .option-card { padding: 40px; border: 2px solid #e0e0e0; border-radius: 15px; text-align: center; transition: all 0.3s; cursor: pointer; text-decoration: none; color: inherit; display: block; }
+    .option-card:hover { border-color: #667eea; transform: translateY(-10px); box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2); }
+    .option-icon { font-size: 64px; margin-bottom: 20px; }
+    .option-card h2 { margin-bottom: 15px; color: #667eea; }
+    .option-card p { color: #666; line-height: 1.6; }
+</style>
+<div class="dashboard-header">
+    <h1>Welcome to Events! 🎉</h1>
+    <p style="color: #666; font-size: 18px;">What would you like to do today?</p>
+</div>
+<div class="options-grid">
+    <a href="{{ url_for('view_events') }}" class="option-card">
+        <div class="option-icon">📅</div>
+        <h2>View Events</h2>
+        <p>Browse all available events and register for activities that interest you</p>
+    </a>
+    <a href="{{ url_for('view_calendar') }}" class="option-card">
+        <div class="option-icon">📆</div>
+        <h2>My Calendar</h2>
+        <p>View all events you've registered for and manage your schedule</p>
+    </a>
+</div>
+{% endblock %}

@@ -1,0 +1,452 @@
+:root {
+    --primary-color: #6366f1;
+    --primary-hover: #4f46e5;
+    --primary-light: #e0e7ff;
+    --success-color: #22c55e;
+    --warning-color: #f97316;
+    --danger-color: #ef4444;
+    --text-dark: #1f2937;
+    --text-muted: #6b7280;
+    --bg-light: #f3f4f6;
+    --border-color: #e5e7eb;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text-dark);
+    background-color: #fafafa;
+}
+
+/* primary colors */
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.bg-primary-subtle {
+    background-color: var(--primary-light) !important;
+}
+
+/* navbar */
+.navbar {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.navbar-brand .logo-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-link {
+    font-weight: 500;
+    color: var(--text-dark) !important;
+    padding: 0.5rem 1rem !important;
+}
+
+.nav-link:hover {
+    color: var(--primary-color) !important;
+}
+
+.nav-link.active {
+    color: var(--primary-color) !important;
+}
+
+/* flash messages and banners */
+.flash-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    text-align: center;
+    color: white;
+    font-weight: 500;
+    z-index: 1050;
+    animation: slideUp 0.3s ease-out, fadeOut 0.3s ease-in 4.7s forwards;
+}
+
+.flash-success {
+    background-color: var(--success-color);
+}
+
+.flash-update {
+    background-color: var(--warning-color);
+}
+
+.flash-delete {
+    background-color: var(--danger-color);
+}
+
+.flash-error {
+    background-color: var(--danger-color);
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+/* story circles section */
+.story-circles-section {
+    background-color: var(--bg-light);
+}
+
+.story-circle {
+    flex-shrink: 0;
+}
+
+.story-avatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background-color: #9ca3af;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.story-avatar:hover {
+    transform: scale(1.05);
+}
+
+/* media upload area */
+.media-upload-area {
+    width: 100%;
+    min-height: 250px;
+    background-color: var(--bg-light);
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.media-upload-area:hover {
+    border-color: var(--primary-color);
+    background-color: var(--primary-light);
+}
+
+/* upload placeholder */
+.upload-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.media-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+.media-preview .preview-item {
+    width: 100%;
+    max-height: 200px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+/* existing media in edit */
+.existing-media-item {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.existing-media-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* story crd */
+.story-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid var(--border-color);
+}
+
+.story-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.story-card-media {
+    height: 200px;
+    overflow: hidden;
+    background-color: var(--bg-light);
+}
+
+.story-card-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.media-placeholder {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+}
+
+/* view story page */
+.story-media-large {
+    min-height: 400px;
+    background-color: #9ca3af;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.story-media-large img,
+.story-media-large video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.media-placeholder-large {
+    height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-light);
+    border-radius: 8px;
+}
+
+.media-thumbnail {
+    width: 60px;
+    height: 60px;
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.media-thumbnail:hover,
+.media-thumbnail.active {
+    opacity: 1;
+    outline: 2px solid var(--primary-color);
+}
+
+.media-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Story Details Boxes */
+.story-title-box,
+.story-description-box {
+    background-color: var(--bg-light);
+    padding: 1rem;
+    border-radius: 4px;
+}
+
+/* stats */
+.story-stats .stat-item button {
+    font-size: 1rem;
+}
+
+.story-stats .stat-item button:hover {
+    color: var(--primary-color) !important;
+}
+
+/* comments section */
+.comments-section {
+    background-color: var(--bg-light);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.comments-box {
+    min-height: 150px;
+}
+
+/* deleted stories */
+.deleted-story-item {
+    transition: background-color 0.2s;
+}
+
+.deleted-story-item:hover {
+    background-color: var(--bg-light) !important;
+}
+
+.user-icon {
+    width: 40px;
+    height: 40px;
+    background-color: var(--bg-light);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* form style */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
+}
+
+.form-label {
+    color: var(--text-dark);
+}
+
+/* main content */
+.main-content {
+    min-height: calc(100vh - 60px);
+    padding-bottom: 80px;
+}
+
+/* responsive */
+@media (max-width: 768px) {
+    .story-media-large {
+        min-height: 250px;
+    }
+
+    .media-upload-area {
+        min-height: 200px;
+    }
+}
+
+/* badge styles */
+.badge {
+    font-weight: 500;
+}
+
+/* alerts */
+.alert {
+    border: none;
+    border-radius: 8px;
+}
+
+.alert-warning {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+/* buttons */
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.btn-warning {
+    background-color: var(--warning-color);
+    border-color: var(--warning-color);
+}
+
+.btn-warning:hover {
+    background-color: #ea580c;
+    border-color: #ea580c;
+}
+/* comment items */
+.comment-item {
+    border: 1px solid var(--border-color);
+    transition: background-color 0.2s;
+}
+
+.comment-item:hover {
+    background-color: #f9fafb !important;
+}
+
+.comment-avatar {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.comment-author {
+    font-size: 0.9rem;
+}
+
+.comment-content {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--text-dark);
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.delete-comment-btn {
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.comment-item:hover .delete-comment-btn {
+    opacity: 1;
+}
+
+/* comment form */
+#commentForm .form-control {
+    font-size: 0.9rem;
+}
+
+#commentForm .form-control:focus {
+    border-color: var(--primary-color);
+}

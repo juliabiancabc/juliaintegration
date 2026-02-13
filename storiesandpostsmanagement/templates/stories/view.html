@@ -1,0 +1,544 @@
+{% extends 'stories_base.html' %}
+
+{% block title %}{{ story.caption }} - LazarusStories{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex align-items-center mb-4">
+        <a href="{{ url_for('stories.mod_manage_posts') if session.get('user_type') == 'moderator' else url_for('stories.list_stories') }}" class="btn btn-link text-dark p-0 me-3">
+            <i class="bi bi-arrow-left fs-4"></i>
+        </a>
+        <h2 class="text-primary mb-0">Our LazarusStories</h2>
+    </div>
+
+    <!-- Story Content -->
+    <div class="row">
+        <!-- Left Column - Media -->
+        <div class="col-lg-6 mb-4">
+            <div class="story-media-large">
+                {% if story.media_paths and story.media_paths|length > 0 %}
+                {% set first_media = story.media_paths[0] %}
+                {% if first_media.endswith('.mp4') or first_media.endswith('.webm') or first_media.endswith('.mov') %}
+                <video src="{{ url_for('stories.static', filename=first_media) }}" controls class="w-100 rounded"></video>
+                {% else %}
+                <img src="{{ url_for('stories.static', filename=first_media) }}" alt="{{ story.caption }}"
+                    class="w-100 rounded">
+                {% endif %}
+                {% else %}
+                <div class="media-placeholder-large">
+                    <i class="bi bi-image display-1 text-muted"></i>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Additional Media Thumbnails -->
+            {% if story.media_paths and story.media_paths|length > 1 %}
+            <div class="d-flex gap-2 mt-3 overflow-auto">
+                {% for media_path in story.media_paths %}
+                <div class="media-thumbnail {% if loop.index0 == 0 %}active{% endif %}" data-index="{{ loop.index0 }}">
+                    <img src="{{ url_for('stories.static', filename=media_path) }}" alt="Media {{ loop.index }}">
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Right Column - Details -->
+        <div class="col-lg-6">
+            <!-- Title -->
+            <div class="story-title-box mb-3">
+                <h4 class="mb-0">{{ story.caption }}</h4>
+            </div>
+
+            <!-- Description -->
+            <div class="story-description-box mb-3">
+                <p class="mb-0">{{ story.description }}</p>
+            </div>
+
+            <!-- Tags -->
+            {% if story.tags %}
+            <div class="mb-3">
+                {% for tag in story.tags %}
+                <span class="badge bg-primary-subtle text-primary me-1">#{{ tag }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Category & Privacy -->
+            <div class="mb-3">
+                <span class="badge bg-light text-dark me-2">
+                    <i class="bi bi-folder me-1"></i>{{ story.category }}
+                </span>
+                <span class="badge bg-light text-dark">
+                    <i class="bi bi-eye me-1"></i>{{ story.privacy }}
+                </span>
+            </div>
+
+            <!-- Event Link -->
+            {% if story.event_title %}
+            <div class="mb-3">
+                <span class="badge bg-info-subtle text-info">
+                    <i class="bi bi-calendar-event me-1"></i>{{ story.event_title }}
+                </span>
+            </div>
+            {% endif %}
+
+            <!-- Stats -->
+            <div class="story-stats d-flex gap-4 mb-4">
+                <div class="stat-item">
+                    <button type="button" class="btn btn-link p-0 text-decoration-none text-dark like-btn" id="likeBtn"
+                        data-story-id="{{ story.id }}">
+                        <i class="bi bi-heart fs-4" id="likeIcon"></i>
+                        <span class="ms-1" id="likesCount">{{ story.likes_count }}</span>
+                    </button>
+                </div>
+                <div class="stat-item">
+                    <button type="button" class="btn btn-link p-0 text-decoration-none text-dark" data-bs-toggle="modal"
+                        data-bs-target="#shareModal">
+                        <i class="bi bi-share fs-4"></i>
+                        <span class="ms-1" id="sharesCount">{{ story.shares_count }}</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Share Modal -->
+            <div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="shareModalLabel">Share this story</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="d-flex flex-wrap gap-3 justify-content-center">
+                                <!-- WhatsApp -->
+                                <button type="button" class="btn btn-success share-platform-btn"
+                                    data-platform="whatsapp" data-story-id="{{ story.id }}">
+                                    <i class="bi bi-whatsapp me-2"></i>WhatsApp
+                                </button>
+                                <!-- Facebook -->
+                                <button type="button" class="btn btn-primary share-platform-btn"
+                                    data-platform="facebook" data-story-id="{{ story.id }}">
+                                    <i class="bi bi-facebook me-2"></i>Facebook
+                                </button>
+                                <!-- Twitter/X -->
+                                <button type="button" class="btn btn-dark share-platform-btn" data-platform="twitter"
+                                    data-story-id="{{ story.id }}">
+                                    <i class="bi bi-twitter-x me-2"></i>Twitter
+                                </button>
+                                <!-- LinkedIn -->
+                                <button type="button" class="btn btn-info share-platform-btn" data-platform="linkedin"
+                                    data-story-id="{{ story.id }}">
+                                    <i class="bi bi-linkedin me-2"></i>LinkedIn
+                                </button>
+                                <!-- Copy Link -->
+                                <button type="button" class="btn btn-secondary share-platform-btn" data-platform="copy"
+                                    data-story-id="{{ story.id }}" id="copyLinkBtn">
+                                    <i class="bi bi-link-45deg me-2"></i><span id="copyBtnText">Copy Link</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comments Section -->
+            <div class="comments-section">
+                <h5 class="mb-3">Comments (<span id="commentsCount">{{ story.comments_count }}</span>)</h5>
+
+                <!-- Comment Form -->
+                <form id="commentForm" class="mb-4">
+                    <div class="mb-2">
+                        <input type="text" class="form-control" id="authorName" name="author_name"
+                            placeholder="Your name" maxlength="50" required>
+                        <div class="invalid-feedback" id="authorNameError"></div>
+                    </div>
+                    <div class="mb-2">
+                        <textarea class="form-control" id="commentContent" name="content" rows="3"
+                            placeholder="Write a comment..." maxlength="1000" required></textarea>
+                        <div class="invalid-feedback" id="contentError"></div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="bi bi-send me-1"></i>Post Comment
+                    </button>
+                </form>
+
+                <!-- Comments List -->
+                <div class="comments-box" id="commentsList">
+                    <!-- Comments will be loaded here via JavaScript -->
+                    <div class="text-center text-muted py-4" id="noCommentsMsg">
+                        <i class="bi bi-chat-dots display-6"></i>
+                        <p class="mt-2 mb-0">No comments yet. Be the first to comment!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="mt-4 d-flex gap-2">
+                <a href="{{ url_for('stories.edit_story', story_id=story.id) }}" class="btn btn-outline-primary">
+                    <i class="bi bi-pencil me-1"></i> Edit
+                </a>
+                <form method="POST" action="{{ url_for('stories.delete_story', story_id=story.id) }}" class="d-inline"
+                    onsubmit="return confirm('Are you sure you want to delete this story?')">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-outline-danger">
+                        <i class="bi bi-trash me-1"></i> Delete
+                    </button>
+                </form>
+                <form method="POST" action="{{ url_for('stories.mod_flag_post', story_id=story.id) }}" class="d-inline"
+                    onsubmit="return confirm('Report this post for review?')">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="reason" value="Reported by user for inappropriate content">
+                    <button type="submit" class="btn btn-outline-warning">
+                        <i class="bi bi-flag me-1"></i> Report
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    (function () {
+        var storyId = {{ story.id }};
+        // Get CSRF token
+        var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        var likeBtn = document.getElementById('likeBtn');
+        var likeIcon = document.getElementById('likeIcon');
+        var likesCount = document.getElementById('likesCount');
+        var sharesCount = document.getElementById('sharesCount');
+
+    // Check if user has already liked this story (using localStorage)
+    var likedStories = JSON.parse(localStorage.getItem('likedStories') || '[]');
+    var isLiked = likedStories.indexOf(storyId) !== -1;
+
+    // Update initial UI state
+    if (isLiked) {
+        likeIcon.classList.remove('bi-heart');
+        likeIcon.classList.add('bi-heart-fill', 'text-danger');
+    }
+
+    // Like button click handler
+    likeBtn.addEventListener('click', function () {
+        var action = isLiked ? 'unlike' : 'like';
+
+        fetch('/stories/' + storyId + '/like', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ action: action })
+        })
+            .then(function (response) { return response.json(); })
+            .then(function (data) {
+                if (data.success) {
+                    likesCount.textContent = data.likes_count;
+                    isLiked = !isLiked;
+
+                    // Update localStorage
+                    var storedLikes = JSON.parse(localStorage.getItem('likedStories') || '[]');
+                    if (isLiked) {
+                        storedLikes.push(storyId);
+                        likeIcon.classList.remove('bi-heart');
+                        likeIcon.classList.add('bi-heart-fill', 'text-danger');
+                    } else {
+                        var index = storedLikes.indexOf(storyId);
+                        if (index > -1) storedLikes.splice(index, 1);
+                        likeIcon.classList.remove('bi-heart-fill', 'text-danger');
+                        likeIcon.classList.add('bi-heart');
+                    }
+                    localStorage.setItem('likedStories', JSON.stringify(storedLikes));
+                }
+            })
+            .catch(function (error) {
+                console.error('Error toggling like:', error);
+            });
+    });
+
+    // Share platform button handlers
+    var shareButtons = document.querySelectorAll('.share-platform-btn');
+    var storyUrl = window.location.href;
+    var storyTitle = {{ story.caption | tojson }};
+
+    shareButtons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var platform = this.dataset.platform;
+            var shareUrl = encodeURIComponent(storyUrl);
+            var shareText = encodeURIComponent('Check out this story: ' + storyTitle);
+
+            var platformUrl = '';
+
+            switch (platform) {
+                case 'whatsapp':
+                    platformUrl = 'https://wa.me/?text=' + shareText + '%20' + shareUrl;
+                    break;
+                case 'facebook':
+                    platformUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + shareUrl;
+                    break;
+                case 'twitter':
+                    platformUrl = 'https://twitter.com/intent/tweet?text=' + shareText + '&url=' + shareUrl;
+                    break;
+                case 'linkedin':
+                    platformUrl = 'https://www.linkedin.com/sharing/share-offsite/?url=' + shareUrl;
+                    break;
+                case 'copy':
+                    navigator.clipboard.writeText(storyUrl).then(function () {
+                        var copyBtnText = document.getElementById('copyBtnText');
+                        copyBtnText.textContent = 'Copied!';
+                        setTimeout(function () {
+                            copyBtnText.textContent = 'Copy Link';
+                        }, 2000);
+                    }).catch(function (err) {
+                        console.error('Failed to copy:', err);
+                    });
+                    break;
+            }
+
+            // Increment share count
+            fetch('/stories/' + storyId + '/share', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrfToken
+                }
+            })
+                .then(function (response) { return response.json(); })
+                .then(function (data) {
+                    if (data.success) {
+                        sharesCount.textContent = data.shares_count;
+                    }
+                })
+                .catch(function (error) {
+                    console.error('Error incrementing share count:', error);
+                });
+
+            // Open share dialog (except for copy)
+            if (platform !== 'copy' && platformUrl) {
+                window.open(platformUrl, '_blank', 'width=600,height=400');
+            }
+        });
+    });
+    }) ();
+
+    // ==================== COMMENTS FUNCTIONALITY ====================
+    (function() {
+        var storyId = {{ story.id }};
+    // Get CSRF token
+    var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+    var commentForm = document.getElementById('commentForm');
+    var authorNameInput = document.getElementById('authorName');
+    var commentContentInput = document.getElementById('commentContent');
+    var commentsList = document.getElementById('commentsList');
+    var noCommentsMsg = document.getElementById('noCommentsMsg');
+    var commentsCountEl = document.getElementById('commentsCount');
+
+    // Format date for display
+    function formatDate(isoString) {
+        var date = new Date(isoString);
+        var now = new Date();
+        var diff = Math.floor((now - date) / 1000); // seconds
+
+        if (diff < 60) return 'Just now';
+        if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+        if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+        if (diff < 604800) return Math.floor(diff / 86400) + 'd ago';
+
+        return date.toLocaleDateString();
+    }
+
+    // Create comment HTML element
+    function createCommentElement(comment) {
+        var div = document.createElement('div');
+        div.className = 'comment-item p-3 mb-2 bg-white rounded';
+        div.dataset.commentId = comment.id;
+        div.innerHTML =
+            '<div class="d-flex justify-content-between align-items-start">' +
+            '<div class="d-flex align-items-center mb-2">' +
+            '<div class="comment-avatar me-2"><i class="bi bi-person-circle fs-4 text-muted"></i></div>' +
+            '<div>' +
+            '<strong class="comment-author">' + escapeHtml(comment.author_name) + '</strong>' +
+            '<small class="text-muted ms-2">' + formatDate(comment.created_at) + '</small>' +
+            '</div>' +
+            '</div>' +
+            '<button type="button" class="btn btn-link btn-sm text-danger p-0 delete-comment-btn" ' +
+            'data-comment-id="' + comment.id + '" title="Delete comment">' +
+            '<i class="bi bi-trash"></i>' +
+            '</button>' +
+            '</div>' +
+            '<p class="comment-content mb-0">' + escapeHtml(comment.content) + '</p>';
+        return div;
+    }
+
+    // Escape HTML to prevent XSS
+    function escapeHtml(text) {
+        var div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Load comments
+    function loadComments() {
+        fetch('/stories/' + storyId + '/comments')
+            .then(function (response) { return response.json(); })
+            .then(function (data) {
+                if (data.success) {
+                    renderComments(data.comments);
+                }
+            })
+            .catch(function (error) {
+                console.error('Error loading comments:', error);
+            });
+    }
+
+    // Render comments list
+    function renderComments(comments) {
+        // Clear existing comments except the no-comments message
+        var existingComments = commentsList.querySelectorAll('.comment-item');
+        existingComments.forEach(function (el) { el.remove(); });
+
+        if (comments.length === 0) {
+            noCommentsMsg.style.display = 'block';
+        } else {
+            noCommentsMsg.style.display = 'none';
+            comments.forEach(function (comment) {
+                commentsList.appendChild(createCommentElement(comment));
+            });
+            attachDeleteHandlers();
+        }
+    }
+
+    // Add a single comment to the list
+    function addCommentToList(comment) {
+        noCommentsMsg.style.display = 'none';
+        var commentEl = createCommentElement(comment);
+        commentsList.insertBefore(commentEl, commentsList.firstChild);
+        attachDeleteHandlers();
+    }
+
+    // Attach delete handlers to delete buttons
+    function attachDeleteHandlers() {
+        var deleteButtons = commentsList.querySelectorAll('.delete-comment-btn');
+        deleteButtons.forEach(function (btn) {
+            btn.onclick = function () {
+                var commentId = this.dataset.commentId;
+                if (confirm('Are you sure you want to delete this comment?')) {
+                    deleteComment(commentId);
+                }
+            };
+        });
+    }
+
+    // Delete a comment
+    function deleteComment(commentId) {
+        fetch('/stories/' + storyId + '/comments/' + commentId, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrfToken
+            }
+        })
+            .then(function (response) { return response.json(); })
+            .then(function (data) {
+                if (data.success) {
+                    // Remove comment from DOM
+                    var commentEl = commentsList.querySelector('[data-comment-id="' + commentId + '"]');
+                    if (commentEl) {
+                        commentEl.remove();
+                    }
+                    // Update count
+                    commentsCountEl.textContent = data.comments_count;
+                    // Show no comments message if needed
+                    if (commentsList.querySelectorAll('.comment-item').length === 0) {
+                        noCommentsMsg.style.display = 'block';
+                    }
+                }
+            })
+            .catch(function (error) {
+                console.error('Error deleting comment:', error);
+            });
+    }
+
+    // Handle comment form submission
+    commentForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        // Clear previous errors
+        authorNameInput.classList.remove('is-invalid');
+        commentContentInput.classList.remove('is-invalid');
+
+        var authorName = authorNameInput.value.trim();
+        var content = commentContentInput.value.trim();
+
+        // Client-side validation
+        var hasError = false;
+        if (!authorName) {
+            authorNameInput.classList.add('is-invalid');
+            document.getElementById('authorNameError').textContent = 'Name is required';
+            hasError = true;
+        }
+        if (!content) {
+            commentContentInput.classList.add('is-invalid');
+            document.getElementById('contentError').textContent = 'Comment is required';
+            hasError = true;
+        }
+        if (hasError) return;
+
+        // Submit comment
+        fetch('/stories/' + storyId + '/comments', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                author_name: authorName,
+                content: content
+            })
+        })
+            .then(function (response) { return response.json(); })
+            .then(function (data) {
+                if (data.success) {
+                    // Add comment to list
+                    addCommentToList(data.comment);
+                    // Update count
+                    commentsCountEl.textContent = data.comments_count;
+                    // Clear form
+                    commentContentInput.value = '';
+                    // Save author name for convenience
+                    localStorage.setItem('commentAuthorName', authorName);
+                } else if (data.errors) {
+                    // Show server-side validation errors
+                    if (data.errors.author_name) {
+                        authorNameInput.classList.add('is-invalid');
+                        document.getElementById('authorNameError').textContent = data.errors.author_name;
+                    }
+                    if (data.errors.content) {
+                        commentContentInput.classList.add('is-invalid');
+                        document.getElementById('contentError').textContent = data.errors.content;
+                    }
+                }
+            })
+            .catch(function (error) {
+                console.error('Error posting comment:', error);
+            });
+    });
+
+    // Restore saved author name
+    var savedAuthorName = localStorage.getItem('commentAuthorName');
+    if (savedAuthorName) {
+        authorNameInput.value = savedAuthorName;
+    }
+
+    // Load comments on page load
+    loadComments();
+    }) ();
+</script>
+{% endblock %}

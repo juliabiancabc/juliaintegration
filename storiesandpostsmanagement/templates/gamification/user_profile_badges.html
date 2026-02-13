@@ -1,0 +1,47 @@
+{% extends 'stories_base.html' %}
+
+{% block title %}Profile Badges — User {{ user_id }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="text-primary mb-4">Profile Badges</h2>
+    <p class="text-muted">Badges and achievements earned by user #{{ user_id }}.</p>
+    <div class="mb-3">
+        Sort badges:
+        <a href="{{ url_for('stories.gamification.user_profile_badges', user_id=user_id, sort='newest') }}" class="btn btn-sm {% if sort_by == 'newest' %}btn-primary{% else %}btn-link{% endif %}">Newest</a>
+        <a href="{{ url_for('stories.gamification.user_profile_badges', user_id=user_id, sort='rarity') }}" class="btn btn-sm {% if sort_by == 'rarity' %}btn-primary{% else %}btn-link{% endif %}">Rarity</a>
+        <a href="{{ url_for('stories.gamification.user_profile_badges', user_id=user_id, sort='alphabetical') }}" class="btn btn-sm {% if sort_by == 'alphabetical' %}btn-primary{% else %}btn-link{% endif %}">A–Z</a>
+    </div>
+    <h5>Badges</h5>
+    <div class="row g-2 mb-4">
+        {% for ub in badges %}
+        <div class="col-md-3 col-6">
+            <div class="card">
+                <div class="card-body py-2 text-center">
+                    {% if ub.badge and ub.badge.icon_url %}
+                    <img src="{{ ub.badge.icon_url }}" alt="{{ ub.badge.title }}" class="rounded" style="max-height: 48px;">
+                    {% else %}
+                    <i class="bi bi-award text-primary fs-3"></i>
+                    {% endif %}
+                    <div class="small fw-bold">{{ ub.badge.title if ub.badge else 'Badge #' ~ ub.badge_id }}</div>
+                    <div class="small text-muted">Earned {{ ub.earned_at[:10] if ub.earned_at else '' }}</div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-muted">No badges earned yet.</div>
+        {% endfor %}
+    </div>
+    <h5>Achievements</h5>
+    <ul class="list-group">
+        {% for ua in achievements %}
+        <li class="list-group-item">
+            {% if ua.achievement %}{{ ua.achievement.title }}{% else %}Achievement #{{ ua.achievement_id }}{% endif %}
+            <span class="text-muted small"> — earned {{ ua.earned_at[:10] if ua.earned_at else '' }}</span>
+        </li>
+        {% else %}
+        <li class="list-group-item text-muted">No achievements earned yet.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

@@ -42,16 +42,52 @@
 </head>
 <body>
     <header>
-        <div class="logo"><a href="/" style="color:inherit; text-decoration:none;"><i class="fa-solid fa-asterisk"></i></a></div>
-        <nav class="nav-links">
-            <a href="/">Home</a>
-            <a href="/messaging/home">Messaging</a>
-            <a href="/stories">LazarusStories</a>
-            <a href="/events/list" style="color: var(--primary-color);">Events</a>
-            <a href="/community">Community</a>
-        </nav>
-        <div style="width: 50px;"></div>
-    </header>
+    <div class="logo">
+        <a href="/" style="color:inherit; text-decoration:none;">
+            <i class="fa-solid fa-asterisk"></i>
+        </a>
+    </div>
+    
+    <div class="input-group input-group-sm" style="width: 200px; margin-left: 20px;">
+        <span class="input-group-text bg-light border-0">
+            <i class="fa-solid fa-search text-muted"></i>
+        </span>
+        <input type="text" class="form-control bg-light border-0" placeholder="Search">
+    </div>
+    
+    <nav class="nav-links">
+        <a href="/">Home</a>
+        <a href="/messaging/home">Messaging</a>
+        <a href="/stories">LazarusStories</a>
+        <a href="/events/list" style="color: var(--primary-color);">Events</a>
+        <a href="/community">Community</a>
+        {% if session.user_type == 'moderator' %}
+            <a href="/stories/gamification/admin">Badges</a>
+        {% else %}
+            <a href="/stories/gamification/catalog">Badges</a>
+        {% endif %}
+    </nav>
+    
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <a href="#" style="text-decoration: none; color: #444; font-size: 14px;">FAQ</a>
+        
+        {% if session.user_id %}
+            {% if session.user_type == 'moderator' %}
+                <a href="/moderator/dashboard" class="btn btn-outline-secondary btn-sm px-3 d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-shield"></i> {{ session.full_name or 'staff' }}
+                </a>
+            {% else %}
+                <a href="/profile" class="btn btn-outline-secondary btn-sm px-3 d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-user"></i> {{ session.full_name or 'User' }}
+                </a>
+            {% endif %}
+            
+            <a href="/logout" class="btn btn-outline-danger btn-sm px-3">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </a>
+        {% endif %}
+    </div>
+</header>
 
     <div class="page-header">
         <div>

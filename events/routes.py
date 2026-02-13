@@ -5,10 +5,14 @@ Author: BridgeGen Team
 Date: February 2026
 """
 
-from flask import render_template, request, redirect, url_for, session, flash, jsonify
+from flask import render_template, request, redirect, url_for, session, flash, jsonify, send_file
 from functools import wraps
 from datetime import datetime, timedelta
 import sqlite3
+import csv
+from io import StringIO, BytesIO
+from werkzeug.utils import secure_filename
+import os
 from events import events_bp
 
 # Database configuration
@@ -268,11 +272,14 @@ def create_event():
         title = request.form.get('title', '').strip()
         description = request.form.get('description', '').strip()
         event_date = request.form.get('date', '').strip()
+        event_time = request.form.get('event_time', '').strip()
         location = request.form.get('location', '').strip()
         category = request.form.get('category', '').strip() if SCHEMA['has_category'] else None
-        max_participants = request.form.get('max_participants', '').strip()
+        seat_amount = request.form.get('seat_amount', '').strip()
+        event_type = request.form.get('event_type', 'physical').strip()
+        tags = request.form.get('tags', '').strip()
         
-        required_fields = [title, description, event_date, location]
+        required_fields = [title, description, event_date, event_time, location, seat_amount]
         if SCHEMA['has_category']:
             required_fields.append(category)
         
@@ -282,7 +289,8 @@ def create_event():
         
         # Validate date is in the future
         try:
-            event_datetime = datetime.strptime(event_date, '%Y-%m-%dT%H:%M')
+            datetime_str = f"{event_date} {event_time}"
+            event_datetime = datetime.strptime(datetime_str, '%Y-%m-%d %H:%M')
             if event_datetime <= datetime.now():
                 flash('Event date must be in the future.', 'danger')
                 return render_template('create_event.html')
@@ -300,29 +308,46 @@ def create_event():
             # New schema with status and category
             status = 'approved' if session.get('user_type') == 'moderator' else 'pending'
             query = f'''
-                INSERT INTO events ({creator_col}, title, description, {date_col}, location, category, max_participants, status)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO events ({creator_col}, title, description, {date_col}, location, category, seat_amount, event_type, tags, status, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             '''
-            params = (session['user_id'], title, description, event_date, location, category,
-                     int(max_participants) if max_participants else None, status)
+            params = (session['user_id'], title, description, event_datetime, location, category,
+                     int(seat_amount) if seat_amount else None, event_type, tags, status, datetime.now())
         elif SCHEMA['has_category']:
             # Has category but no status
             query = f'''
-                INSERT INTO events ({creator_col}, title, description, {date_col}, location, category, max_participants)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO events ({creator_col}, title, description, {date_col}, location, category, seat_amount, event_type, tags, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             '''
-            params = (session['user_id'], title, description, event_date, location, category,
-                     int(max_participants) if max_participants else None)
+            params = (session['user_id'], title, description, event_datetime, location, category,
+                     int(seat_amount) if seat_amount else None, event_type, tags, datetime.now())
         else:
             # Old schema - no category, no status
             query = f'''
-                INSERT INTO events ({creator_col}, title, description, {date_col}, location, max_participants)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO events ({creator_col}, title, description, {date_col}, location, seat_amount, event_type, tags, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             '''
-            params = (session['user_id'], title, description, event_date, location,
-                     int(max_participants) if max_participants else None)
+            params = (session['user_id'], title, description, event_datetime, location,
+                     int(seat_amount) if seat_amount else None, event_type, tags, datetime.now())
         
         conn.execute(query, params)
+        
+        # Get the inserted event ID
+        event_id = conn.execute('SELECT last_insert_rowid()').fetchone()[0]
+        
+        # Handle image upload
+        if 'image' in request.files:
+            file = request.files['image']
+            if file and file.filename:
+                filename = secure_filename(f"{event_id}_{file.filename}")
+                upload_path = os.path.join('static', 'uploads', 'events')
+                os.makedirs(upload_path, exist_ok=True)
+                filepath = os.path.join(upload_path, filename)
+                file.save(filepath)
+                
+                conn.execute('UPDATE events SET image_filename = ? WHERE id = ?', 
+                           (filename, event_id))
+        
         conn.commit()
         conn.close()
         
@@ -364,7 +389,7 @@ def edit_event(event_id):
         event_date = request.form.get('date', '').strip()
         location = request.form.get('location', '').strip()
         category = request.form.get('category', '').strip() if SCHEMA['has_category'] else None
-        max_participants = request.form.get('max_participants', '').strip()
+        seat_amount = request.form.get('seat_amount', '').strip()
         
         required_fields = [title, description, event_date, location]
         if SCHEMA['has_category']:
@@ -379,19 +404,19 @@ def edit_event(event_id):
         if SCHEMA['has_category']:
             query = f'''
                 UPDATE events 
-                SET title = ?, description = ?, {date_col} = ?, location = ?, category = ?, max_participants = ?
+                SET title = ?, description = ?, {date_col} = ?, location = ?, category = ?, seat_amount = ?
                 WHERE id = ?
             '''
             params = (title, description, event_date, location, category,
-                     int(max_participants) if max_participants else None, event_id)
+                     int(seat_amount) if seat_amount else None, event_id)
         else:
             query = f'''
                 UPDATE events 
-                SET title = ?, description = ?, {date_col} = ?, location = ?, max_participants = ?
+                SET title = ?, description = ?, {date_col} = ?, location = ?, seat_amount = ?
                 WHERE id = ?
             '''
             params = (title, description, event_date, location,
-                     int(max_participants) if max_participants else None, event_id)
+                     int(seat_amount) if seat_amount else None, event_id)
         
         conn.execute(query, params)
         conn.commit()
@@ -461,13 +486,13 @@ def register_event(event_id):
         conn.close()
         return redirect(url_for('events.browse_events'))
     
-    # Check max participants
-    if event['max_participants']:
+    # Check max participants (seat_amount)
+    if event.get('seat_amount'):
         current_count = conn.execute('''
             SELECT COUNT(*) as count FROM event_registrations WHERE event_id = ?
         ''', (event_id,)).fetchone()['count']
         
-        if current_count >= event['max_participants']:
+        if current_count >= event['seat_amount']:
             flash('This event is full.', 'warning')
             conn.close()
             return redirect(url_for('events.browse_events'))
@@ -623,7 +648,52 @@ def attendee_insights():
 @moderator_required
 def export_events():
     """
-    Export events to Excel (moderator only)
+    Export events to CSV (moderator only)
     """
-    flash('Export functionality coming soon!', 'info')
-    return redirect(url_for('events.manage_events'))
+    conn = get_db_connection()
+    
+    date_col = SCHEMA['date_column']
+    creator_col = SCHEMA['creator_column']
+    
+    query = f'''
+        SELECT e.*, u.full_name as creator_name,
+               (SELECT COUNT(*) FROM event_registrations WHERE event_id = e.id) as participant_count
+        FROM events e
+        LEFT JOIN users u ON e.{creator_col} = u.id
+        ORDER BY e.{date_col} DESC
+    '''
+    
+    events = conn.execute(query).fetchall()
+    conn.close()
+    
+    # Create CSV in memory
+    si = StringIO()
+    writer = csv.writer(si)
+    
+    # Write headers
+    writer.writerow(['ID', 'Title', 'Description', 'Date', 'Location', 'Category', 'Participants', 'Creator'])
+    
+    # Write data
+    for event in events:
+        writer.writerow([
+            event['id'],
+            event['title'],
+            event['description'],
+            event[date_col],
+            event['location'],
+            event.get('category', 'N/A'),
+            event['participant_count'],
+            event['creator_name']
+        ])
+    
+    # Convert to bytes
+    output = BytesIO()
+    output.write(si.getvalue().encode('utf-8'))
+    output.seek(0)
+    
+    return send_file(
+        output,
+        mimetype='text/csv',
+        as_attachment=True,
+        download_name=f'events_export_{datetime.now().strftime("%Y%m%d")}.csv'
+    )

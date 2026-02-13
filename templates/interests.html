@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card-custom">
+                <h3 class="mb-4">Interest Tags</h3>
+                <p class="text-muted">Help others find you through shared interests</p>
+                
+                <h5 class="mt-4">Your Interests</h5>
+                <div class="mb-3">
+                    {% if interests %}
+                        {% for interest in interests %}
+                            <span class="badge bg-primary me-2 mb-2" style="font-size: 14px; padding: 8px 12px;">
+                                {{ interest.tag }}
+                                <form method="POST" class="d-inline">
+                                    <input type="hidden" name="action" value="remove">
+                                    <input type="hidden" name="tag" value="{{ interest.tag }}">
+                                    <button type="submit" class="btn-close btn-close-white ms-2" style="font-size: 10px;"></button>
+                                </form>
+                            </span>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">No interests added yet</p>
+                    {% endif %}
+                </div>
+
+                <h5 class="mt-4">Popular Interest Tags</h5>
+                <form method="POST" class="mb-3">
+                    <input type="hidden" name="action" value="add">
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for tag in popular_interests %}
+                            <button type="submit" name="tag" value="{{ tag }}" class="btn btn-outline-primary btn-sm">
+                                + {{ tag }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </form>
+
+                <h6 class="mt-4">Add Custom Interest</h6>
+                <form method="POST" class="d-flex gap-2">
+                    <input type="hidden" name="action" value="add">
+                    <input type="text" class="form-control" name="tag" placeholder="Enter interest">
+                    <button type="submit" class="btn btn-primary-custom">Add</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

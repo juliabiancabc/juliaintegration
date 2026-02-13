@@ -1,0 +1,782 @@
+{% extends 'stories_base.html' %}
+
+{% block title %}Stories - LazarusStories{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Full-screen story viewer overlay */
+    .story-viewer-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.85);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Close button */
+    .story-close-btn {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        color: #9ca3af;
+        font-size: 2rem;
+        cursor: pointer;
+        z-index: 10001;
+        background: none;
+        border: none;
+    }
+
+    .story-close-btn:hover {
+        color: white;
+    }
+
+    /* Main story container */
+    .story-viewer-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        width: 100%;
+        max-width: 1200px;
+        height: 80vh;
+    }
+
+    /* Side previews */
+    .story-preview-side {
+        width: 150px;
+        height: 300px;
+        background-color: #d1d5db;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+        overflow: hidden;
+    }
+
+    .story-preview-side:hover {
+        transform: scale(1.05);
+    }
+
+    .story-preview-side .avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-color: #6366f1;
+        margin-bottom: 10px;
+    }
+
+    .story-preview-side .username {
+        color: white;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    /* Navigation arrows */
+    .story-nav-arrow {
+        width: 40px;
+        height: 40px;
+        background-color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        border: none;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .story-nav-arrow:hover {
+        background-color: #f3f4f6;
+    }
+
+    .story-nav-arrow i {
+        color: #6366f1;
+        font-size: 1.2rem;
+    }
+
+    /* Main story card */
+    .story-main-card {
+        width: 500px;
+        height: 800px;
+        background-color: #6b7280;
+        border-radius: 12px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .story-main-card img,
+    .story-main-card video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Story header */
+    .story-header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        padding: 15px;
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), transparent);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        z-index: 10;
+    }
+
+    .story-header-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .story-header .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #6366f1;
+    }
+
+    .story-header .user-info {
+        color: white;
+    }
+
+    .story-header .username {
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .story-header .time-ago {
+        font-size: 0.8rem;
+        opacity: 0.8;
+    }
+
+    /* Dropdown menu */
+    .story-menu-btn {
+        color: white;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 5px;
+    }
+
+    .story-dropdown {
+        position: absolute;
+        top: 45px;
+        right: 15px;
+        background: white;
+        border-radius: 8px;
+        padding: 8px 0;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        display: none;
+        z-index: 20;
+    }
+
+    .story-dropdown.show {
+        display: block;
+    }
+
+    .story-dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        color: #374151;
+        font-size: 0.9rem;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .story-dropdown-item:hover {
+        background-color: #f3f4f6;
+    }
+
+    /* Progress bar at top */
+    .story-progress-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        gap: 3px;
+        padding: 8px 15px;
+        z-index: 11;
+    }
+
+    .story-progress-bar {
+        flex: 1;
+        height: 3px;
+        background-color: rgba(255, 255, 255, 0.3);
+        border-radius: 2px;
+        overflow: hidden;
+    }
+
+    .story-progress-bar.active {
+        background-color: white;
+    }
+
+    .story-progress-bar.completed {
+        background-color: white;
+    }
+
+    /* Story content overlay */
+    .story-content-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 20px;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+        color: white;
+    }
+
+    .story-content-overlay h4 {
+        margin-bottom: 5px;
+    }
+
+    .story-content-overlay p {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin: 0;
+    }
+
+    /* Hide default content when in viewer mode */
+    body.story-viewer-active .main-content,
+    body.story-viewer-active .navbar {
+        filter: blur(5px);
+    }
+
+    @media (max-width: 768px) {
+        .story-preview-side {
+            display: none;
+        }
+
+        .story-main-card {
+            width: 100%;
+            height: 100vh;
+            border-radius: 0;
+        }
+    }
+
+    /* Story action buttons */
+    .story-actions {
+        display: flex;
+        gap: 20px;
+        margin-top: 15px;
+    }
+
+    .story-action-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.9rem;
+        transition: background-color 0.2s;
+    }
+
+    .story-action-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .story-action-btn.liked i {
+        color: #ef4444;
+    }
+
+    /* Share modal in viewer */
+    .viewer-share-modal {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 25px;
+        border-radius: 16px;
+        z-index: 10002;
+        width: 90%;
+        max-width: 400px;
+        box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+    }
+
+    .viewer-share-modal.show {
+        display: block;
+    }
+
+    .viewer-share-modal h5 {
+        margin-bottom: 20px;
+        color: #374151;
+    }
+
+    .share-buttons-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .share-buttons-grid button {
+        border: none;
+        padding: 12px 16px;
+        border-radius: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-size: 0.9rem;
+        color: white;
+        transition: opacity 0.2s;
+    }
+
+    .share-buttons-grid button:hover {
+        opacity: 0.9;
+    }
+
+    .share-buttons-grid .whatsapp {
+        background-color: #25D366;
+    }
+
+    .share-buttons-grid .facebook {
+        background-color: #1877F2;
+    }
+
+    .share-buttons-grid .twitter {
+        background-color: #1DA1F2;
+    }
+
+    .share-buttons-grid .linkedin {
+        background-color: #0A66C2;
+    }
+
+    .share-buttons-grid .copy {
+        background-color: #6B7280;
+    }
+
+    .viewer-share-modal .close-modal {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: #9ca3af;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Story Viewer Overlay -->
+<div class="story-viewer-overlay" id="storyViewer">
+    <!-- Close Button -->
+    <button class="story-close-btn" onclick="closeStoryViewer()">
+        <i class="bi bi-x"></i>
+    </button>
+
+    <div class="story-viewer-container">
+        <!-- Left Preview -->
+        <div class="story-preview-side" id="prevStoryPreview" onclick="navigateStory('prev')">
+            <div class="avatar"></div>
+            <span class="username" id="prevUsername">Username</span>
+        </div>
+
+        <!-- Prev Arrow -->
+        <button class="story-nav-arrow" onclick="navigateStory('prev')">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+
+        <!-- Main Story Card -->
+        <div class="story-main-card">
+            <!-- Progress bars -->
+            <div class="story-progress-container" id="progressContainer">
+                <!-- Progress bars will be added dynamically -->
+            </div>
+
+            <!-- Header -->
+            <div class="story-header">
+                <div class="story-header-left">
+                    <div class="avatar"></div>
+                    <div class="user-info">
+                        <div class="username" id="storyUsername">Username</div>
+                        <div class="time-ago" id="storyTimeAgo">2h</div>
+                    </div>
+                </div>
+                <div class="position-relative">
+                    <button class="story-menu-btn" onclick="toggleStoryMenu()">
+                        <i class="bi bi-three-dots-vertical"></i>
+                    </button>
+                    <div class="story-dropdown" id="storyDropdown">
+                        <a href="#" class="story-dropdown-item" onclick="reportStory()">
+                            <i class="bi bi-exclamation-circle"></i> Report
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Story Media -->
+            <div id="storyMediaContainer">
+                <!-- Media will be loaded here -->
+            </div>
+
+            <!-- Content Overlay -->
+            <div class="story-content-overlay">
+                <h4 id="storyCaption">Story Caption</h4>
+                <p id="storyDescription">Story description goes here...</p>
+                <div class="story-actions">
+                    <button class="story-action-btn" id="viewerLikeBtn">
+                        <i class="bi bi-heart" id="viewerLikeIcon"></i>
+                        <span id="viewerLikesCount">0</span>
+                    </button>
+                    <button class="story-action-btn" id="viewerShareBtn">
+                        <i class="bi bi-share"></i>
+                        <span id="viewerSharesCount">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Next Arrow -->
+        <button class="story-nav-arrow" onclick="navigateStory('next')">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+
+        <!-- Right Preview -->
+        <div class="story-preview-side" id="nextStoryPreview" onclick="navigateStory('next')">
+            <div class="avatar"></div>
+            <span class="username" id="nextUsername">Username</span>
+        </div>
+    </div>
+</div>
+
+<!-- Share Modal for Viewer -->
+<div class="viewer-share-modal" id="viewerShareModal">
+    <button class="close-modal" onclick="closeShareModal()">&times;</button>
+    <h5>Share this story</h5>
+    <div class="share-buttons-grid">
+        <button class="share-platform-btn whatsapp" onclick="shareToViewer('whatsapp')">
+            <i class="bi bi-whatsapp"></i> WhatsApp
+        </button>
+        <button class="share-platform-btn facebook" onclick="shareToViewer('facebook')">
+            <i class="bi bi-facebook"></i> Facebook
+        </button>
+        <button class="share-platform-btn twitter" onclick="shareToViewer('twitter')">
+            <i class="bi bi-twitter-x"></i> Twitter
+        </button>
+        <button class="share-platform-btn linkedin" onclick="shareToViewer('linkedin')">
+            <i class="bi bi-linkedin"></i> LinkedIn
+        </button>
+        <button class="share-platform-btn copy" id="viewerCopyBtn" onclick="shareToViewer('copy')">
+            <i class="bi bi-link-45deg"></i> <span id="viewerCopyText">Copy Link</span>
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Stories data from server
+    const stories = {{ stories_json | safe }}; // eslint-disable-line
+    let currentIndex = {{ initial_index }}; // eslint-disable-line
+
+    // Initialize the viewer
+    document.addEventListener('DOMContentLoaded', function () {
+        if (stories.length > 0) {
+            loadStory(currentIndex);
+            updateProgressBars();
+        }
+    });
+
+    function loadStory(index) {
+        if (index < 0 || index >= stories.length) return;
+
+        const story = stories[index];
+        currentIndex = index;
+
+        // Update username and time
+        document.getElementById('storyUsername').textContent = 'User ' + story.id;
+        document.getElementById('storyTimeAgo').textContent = getTimeAgo(story.created_at);
+
+        // Update caption and description
+        document.getElementById('storyCaption').textContent = story.caption || '';
+        document.getElementById('storyDescription').textContent =
+            story.description ? story.description.substring(0, 100) + '...' : '';
+
+        // Update media
+        const mediaContainer = document.getElementById('storyMediaContainer');
+        mediaContainer.innerHTML = '';
+
+        if (story.media_paths && story.media_paths.length > 0) {
+            const mediaPath = story.media_paths[0];
+            if (mediaPath.endsWith('.mp4') || mediaPath.endsWith('.webm') || mediaPath.endsWith('.mov')) {
+                const video = document.createElement('video');
+                video.src = '/static/' + mediaPath;
+                video.autoplay = true;
+                video.muted = true;
+                video.loop = true;
+                mediaContainer.appendChild(video);
+            } else {
+                const img = document.createElement('img');
+                img.src = '/static/' + mediaPath;
+                img.alt = story.caption;
+                mediaContainer.appendChild(img);
+            }
+        }
+
+        // Update side previews
+        updateSidePreviews();
+        updateProgressBars();
+    }
+
+    function updateSidePreviews() {
+        const prevPreview = document.getElementById('prevStoryPreview');
+        const nextPreview = document.getElementById('nextStoryPreview');
+
+        if (currentIndex > 0) {
+            prevPreview.style.visibility = 'visible';
+            document.getElementById('prevUsername').textContent = 'User ' + stories[currentIndex - 1].id;
+        } else {
+            prevPreview.style.visibility = 'hidden';
+        }
+
+        if (currentIndex < stories.length - 1) {
+            nextPreview.style.visibility = 'visible';
+            document.getElementById('nextUsername').textContent = 'User ' + stories[currentIndex + 1].id;
+        } else {
+            nextPreview.style.visibility = 'hidden';
+        }
+    }
+
+    function updateProgressBars() {
+        const container = document.getElementById('progressContainer');
+        container.innerHTML = '';
+
+        stories.forEach((_, index) => {
+            const bar = document.createElement('div');
+            bar.className = 'story-progress-bar';
+            if (index < currentIndex) {
+                bar.classList.add('completed');
+            } else if (index === currentIndex) {
+                bar.classList.add('active');
+            }
+            container.appendChild(bar);
+        });
+    }
+
+    function navigateStory(direction) {
+        if (direction === 'prev' && currentIndex > 0) {
+            loadStory(currentIndex - 1);
+        } else if (direction === 'next' && currentIndex < stories.length - 1) {
+            loadStory(currentIndex + 1);
+        }
+    }
+
+    function closeStoryViewer() {
+        window.location.href = '{{ url_for("list_stories") }}';
+    }
+
+    function toggleStoryMenu() {
+        const dropdown = document.getElementById('storyDropdown');
+        dropdown.classList.toggle('show');
+    }
+
+    function reportStory() {
+        alert('Report functionality will be implemented with user authentication.');
+        toggleStoryMenu();
+    }
+
+    function getTimeAgo(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const seconds = Math.floor((now - date) / 1000);
+
+        if (seconds < 60) return 'Just now';
+        if (seconds < 3600) return Math.floor(seconds / 60) + 'm';
+        if (seconds < 86400) return Math.floor(seconds / 3600) + 'h';
+        return Math.floor(seconds / 86400) + 'd';
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowLeft') navigateStory('prev');
+        if (e.key === 'ArrowRight') navigateStory('next');
+        if (e.key === 'Escape') closeStoryViewer();
+    });
+
+    // Click outside to close dropdown
+    document.addEventListener('click', function (e) {
+        const dropdown = document.getElementById('storyDropdown');
+        const menuBtn = document.querySelector('.story-menu-btn');
+        if (!menuBtn.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.classList.remove('show');
+        }
+    });
+
+    // Like/Unlike functionality
+    const viewerLikeBtn = document.getElementById('viewerLikeBtn');
+    const viewerLikeIcon = document.getElementById('viewerLikeIcon');
+    const viewerLikesCount = document.getElementById('viewerLikesCount');
+    const viewerSharesCount = document.getElementById('viewerSharesCount');
+    const viewerShareBtn = document.getElementById('viewerShareBtn');
+    const viewerShareModal = document.getElementById('viewerShareModal');
+
+    // Track likes in localStorage
+    let likedStories = JSON.parse(localStorage.getItem('likedStories') || '[]');
+
+    function updateViewerLikeUI() {
+        const story = stories[currentIndex];
+        if (!story) return;
+
+        const isLiked = likedStories.indexOf(story.id) !== -1;
+        viewerLikesCount.textContent = story.likes_count;
+        viewerSharesCount.textContent = story.shares_count;
+
+        if (isLiked) {
+            viewerLikeIcon.classList.remove('bi-heart');
+            viewerLikeIcon.classList.add('bi-heart-fill');
+            viewerLikeBtn.classList.add('liked');
+        } else {
+            viewerLikeIcon.classList.remove('bi-heart-fill');
+            viewerLikeIcon.classList.add('bi-heart');
+            viewerLikeBtn.classList.remove('liked');
+        }
+    }
+
+    // Update like UI when story changes
+    const originalLoadStory = loadStory;
+    loadStory = function (index) {
+        originalLoadStory(index);
+        updateViewerLikeUI();
+    };
+
+    // Initialize like UI
+    updateViewerLikeUI();
+
+    viewerLikeBtn.addEventListener('click', function () {
+        const story = stories[currentIndex];
+        if (!story) return;
+
+        const isLiked = likedStories.indexOf(story.id) !== -1;
+        const action = isLiked ? 'unlike' : 'like';
+
+        fetch('/stories/' + story.id + '/like', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ action: action })
+        })
+            .then(function (response) { return response.json(); })
+            .then(function (data) {
+                if (data.success) {
+                    story.likes_count = data.likes_count;
+
+                    if (action === 'like') {
+                        likedStories.push(story.id);
+                    } else {
+                        const idx = likedStories.indexOf(story.id);
+                        if (idx > -1) likedStories.splice(idx, 1);
+                    }
+                    localStorage.setItem('likedStories', JSON.stringify(likedStories));
+                    updateViewerLikeUI();
+                }
+            })
+            .catch(function (error) {
+                console.error('Error toggling like:', error);
+            });
+    });
+
+    // Share modal functionality
+    viewerShareBtn.addEventListener('click', function () {
+        viewerShareModal.classList.add('show');
+    });
+
+    function closeShareModal() {
+        viewerShareModal.classList.remove('show');
+    }
+
+    function shareToViewer(platform) {
+        const story = stories[currentIndex];
+        if (!story) return;
+
+        const storyUrl = window.location.origin + '/stories/' + story.id;
+        const shareUrl = encodeURIComponent(storyUrl);
+        const shareText = encodeURIComponent('Check out this story: ' + story.caption);
+
+        let platformUrl = '';
+
+        switch (platform) {
+            case 'whatsapp':
+                platformUrl = 'https://wa.me/?text=' + shareText + '%20' + shareUrl;
+                break;
+            case 'facebook':
+                platformUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + shareUrl;
+                break;
+            case 'twitter':
+                platformUrl = 'https://twitter.com/intent/tweet?text=' + shareText + '&url=' + shareUrl;
+                break;
+            case 'linkedin':
+                platformUrl = 'https://www.linkedin.com/sharing/share-offsite/?url=' + shareUrl;
+                break;
+            case 'copy':
+                navigator.clipboard.writeText(storyUrl).then(function () {
+                    const copyText = document.getElementById('viewerCopyText');
+                    copyText.textContent = 'Copied!';
+                    setTimeout(function () {
+                        copyText.textContent = 'Copy Link';
+                    }, 2000);
+                }).catch(function (err) {
+                    console.error('Failed to copy:', err);
+                });
+                break;
+        }
+
+        // Increment share count
+        fetch('/stories/' + story.id + '/share', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(function (response) { return response.json(); })
+            .then(function (data) {
+                if (data.success) {
+                    story.shares_count = data.shares_count;
+                    updateViewerLikeUI();
+                }
+            })
+            .catch(function (error) {
+                console.error('Error incrementing share count:', error);
+            });
+
+        // Open share dialog (except for copy)
+        if (platform !== 'copy' && platformUrl) {
+            window.open(platformUrl, '_blank', 'width=600,height=400');
+        }
+    }
+
+    // Close modal when clicking outside
+    viewerShareModal.addEventListener('click', function (e) {
+        if (e.target === viewerShareModal) {
+            closeShareModal();
+        }
+    });
+</script>
+{% endblock %}

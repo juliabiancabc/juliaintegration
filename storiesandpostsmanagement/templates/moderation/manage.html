@@ -1,0 +1,55 @@
+{% extends 'stories_base.html' %}
+{% block title %}Manage Posts and Stories{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 900px;">
+    <!-- Header -->
+    <div class="d-flex align-items-center mb-4">
+        <a href="{{ url_for('moderator_dashboard') }}" class="text-dark me-3" style="font-size: 1.5rem;">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <h4 class="fw-bold mb-0">Manage Posts and Stories</h4>
+            <small class="text-muted">{{ admin_name }}</small>
+        </div>
+    </div>
+
+    <!-- Action Cards -->
+    <div class="card border rounded-3 shadow-sm">
+        <div class="card-body p-0">
+            <!-- Flagged Posts and Stories -->
+            <a href="{{ url_for('stories.mod_flagged_posts') }}" class="d-flex align-items-center p-4 text-decoration-none text-dark border-bottom">
+                <div class="rounded-3 p-3 me-3" style="background-color: #f3e8ff;">
+                    <i class="bi bi-people-fill" style="font-size: 1.5rem; color: #9333ea;"></i>
+                </div>
+                <div>
+                    <h6 class="fw-semibold mb-1">Flagged Posts and Stories</h6>
+                    <small class="text-muted">View reported Posts and Stories</small>
+                </div>
+            </a>
+
+            <!-- Manage Posts and Stories -->
+            <a href="{{ url_for('stories.mod_delete_posts') }}" class="d-flex align-items-center p-4 text-decoration-none text-dark border-bottom">
+                <div class="rounded-3 p-3 me-3" style="background-color: #fff7ed;">
+                    <i class="bi bi-archive-fill" style="font-size: 1.5rem; color: #ea580c;"></i>
+                </div>
+                <div>
+                    <h6 class="fw-semibold mb-1">Manage Posts and Stories</h6>
+                    <small class="text-muted">Delete inappropriate posts and stories</small>
+                </div>
+            </a>
+
+            <!-- View All Posts -->
+            <a href="{{ url_for('stories.list_stories') }}" class="d-flex align-items-center p-4 text-decoration-none text-dark">
+                <div class="rounded-3 p-3 me-3" style="background-color: #fff7ed;">
+                    <i class="bi bi-archive-fill" style="font-size: 1.5rem; color: #ea580c;"></i>
+                </div>
+                <div>
+                    <h6 class="fw-semibold mb-1">View All Posts and Stories</h6>
+                    <small class="text-muted">Browse all published content</small>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

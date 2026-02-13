@@ -1,0 +1,30 @@
+{% extends 'stories_base.html' %}
+
+{% block title %}{% if badge %}Edit Badge{% else %}Create Badge{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="text-primary mb-4">{% if badge %}Edit Badge{% else %}Create Badge{% endif %}</h2>
+    <a href="{{ url_for('stories.gamification.admin_badges_list') }}" class="btn btn-link mb-3">← Back to Badges</a>
+    <form method="post" class="max-w-500">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="mb-3">
+            <label for="title" class="form-label">Title *</label>
+            <input type="text" name="title" id="title" class="form-control" value="{{ badge.title if badge else '' }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea name="description" id="description" class="form-control" rows="2">{{ badge.description if badge else '' }}</textarea>
+        </div>
+        <div class="mb-3">
+            <label for="icon_url" class="form-label">Icon URL</label>
+            <input type="text" name="icon_url" id="icon_url" class="form-control" value="{{ badge.icon_url if badge else '' }}" placeholder="URL or path">
+        </div>
+        <div class="mb-3">
+            <label for="sort_order" class="form-label">Sort order</label>
+            <input type="number" name="sort_order" id="sort_order" class="form-control" value="{{ badge.sort_order if badge else 0 }}">
+        </div>
+        <button type="submit" class="btn btn-primary">{% if badge %}Update{% else %}Create{% endif %} Badge</button>
+    </form>
+</div>
+{% endblock %}

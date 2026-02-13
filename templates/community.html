@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Communities</h2>
+    <div class="row">
+        {% for comm in communities %}
+        <div class="col-md-4 mb-3">
+            <div class="card-custom">
+                <h5>{{ comm.name }}</h5>
+                <p class="text-muted small">Created by {{ comm.creator_name }}</p>
+                <p>{{ comm.description or 'No description' }}</p>
+                <p class="text-muted"><i class="fas fa-users"></i> {{ comm.member_count }} members</p>
+                <form method="POST" action="{{ url_for('join_community', community_id=comm.id) }}">
+                    <button type="submit" class="btn btn-primary-custom btn-sm">Join</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

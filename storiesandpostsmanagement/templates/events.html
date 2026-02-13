@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BridgeGen - Events</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* REUSED CORE STYLES */
+        :root { --primary-color: #5b5FEF; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { height: 100vh; display: flex; flex-direction: column; }
+        header { display: flex; align-items: center; justify-content: space-between; padding: 15px 40px; background: white; border-bottom: 1px solid #eee; height: 70px;}
+        .logo { font-size: 24px; color: var(--primary-color); }
+        .nav-links { display: flex; gap: 30px; }
+        .nav-links a { text-decoration: none; color: #444; font-weight: 500; font-size: 14px; }
+        .nav-links a:hover { color: var(--primary-color); }
+        .container { display: flex; flex: 1; height: calc(100vh - 70px); }
+        
+        /* EVENTS STYLES */
+        .left-panel { width: 35%; background-color: var(--primary-color); color: white; padding: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .right-panel { width: 65%; background: white; padding: 40px; overflow-y: auto; }
+
+        /* Fake Calendar CSS */
+        .calendar-widget { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; width: 100%; max-width: 300px; text-align: center; }
+        .cal-month { font-weight: bold; margin-bottom: 15px; font-size: 18px; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; font-size: 12px; }
+        .cal-day { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+        .cal-day.active { background: white; color: var(--primary-color); font-weight: bold; }
+
+        .event-card { display: flex; gap: 20px; border: 1px solid #eee; padding: 20px; border-radius: 10px; margin-bottom: 20px; transition: 0.2s; }
+        .event-card:hover { border-color: var(--primary-color); }
+        .date-badge { background: #f0f0f0; min-width: 70px; height: 70px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #333; }
+        .date-badge span { font-weight: bold; font-size: 18px; }
+        .event-details h3 { font-size: 18px; margin-bottom: 5px; color: var(--primary-color); }
+        .event-info { display: flex; gap: 15px; font-size: 12px; color: #777; margin-bottom: 10px; }
+        .register-btn { background: var(--primary-color); color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo"><a href="/" style="color:inherit; text-decoration:none;"><i class="fa-solid fa-asterisk"></i></a></div>
+        <nav class="nav-links">
+            <a href="/">Home</a>
+            <a href="/messages">Messaging</a>
+            <a href="/stories">LazarusStories</a>
+            <a href="/events" style="color: var(--primary-color);">Events</a>
+            <a href="/community">Community</a>
+        </nav>
+        <div style="width: 50px;"></div>
+    </header>
+
+    <div class="container">
+        <aside class="left-panel">
+            <div class="calendar-widget">
+                <div class="cal-month">January 2026</div>
+                <div class="cal-grid">
+                    <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+                    <div></div><div></div><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div>
+                    <div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div>
+                    <div class="cal-day active">13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div>
+                </div>
+            </div>
+            <p style="margin-top:20px; font-size:14px; opacity:0.8;">3 Events Upcoming</p>
+        </aside>
+
+        <main class="right-panel">
+            <h2 style="margin-bottom: 30px;">Upcoming Events</h2>
+
+            <div class="event-card">
+                <div class="date-badge">
+                    <span>15</span>JAN
+                </div>
+                <div class="event-details">
+                    <h3>BridgeGen Community Meetup</h3>
+                    <div class="event-info">
+                        <span><i class="fa-regular fa-clock"></i> 6:00 PM</span>
+                        <span><i class="fa-solid fa-location-dot"></i> Online</span>
+                    </div>
+                    <p style="font-size:14px; color:#555; margin-bottom:10px;">Join us for a virtual coffee chat to meet the new members.</p>
+                    <button class="register-btn">Register Now</button>
+                </div>
+            </div>
+
+            <div class="event-card">
+                <div class="date-badge">
+                    <span>22</span>JAN
+                </div>
+                <div class="event-details">
+                    <h3>AI in Storytelling Workshop</h3>
+                    <div class="event-info">
+                        <span><i class="fa-regular fa-clock"></i> 2:00 PM</span>
+                        <span><i class="fa-solid fa-location-dot"></i> Room A</span>
+                    </div>
+                    <p style="font-size:14px; color:#555; margin-bottom:10px;">Learn how to use our tools to craft compelling narratives.</p>
+                    <button class="register-btn">Register Now</button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</body>
+</html>

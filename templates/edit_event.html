@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Edit Event{% endblock %}
+{% block content %}
+<style>
+    .form-container { max-width: 700px; margin: 0 auto; }
+    .page-header { margin-bottom: 40px; }
+    .form-group { margin-bottom: 25px; }
+    .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #333; }
+    .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; font-family: inherit; }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: #667eea; }
+    .form-group textarea { min-height: 120px; resize: vertical; }
+    .form-actions { display: flex; gap: 15px; margin-top: 35px; }
+</style>
+<div class="form-container">
+    <div class="page-header">
+        <h1>Edit Event ✏️</h1>
+        <p style="color: #666;">Update the event details below</p>
+    </div>
+    <form method="POST" action="{{ url_for('edit_event', event_id=event.id) }}">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            {{ form.title.label }}
+            {{ form.title }}
+        </div>
+        <div class="form-group">
+            {{ form.description.label }}
+            {{ form.description }}
+        </div>
+        <div class="form-group">
+            {{ form.date.label }}
+            {{ form.date }}
+        </div>
+        <div class="form-group">
+            {{ form.location.label }}
+            {{ form.location }}
+        </div>
+        <div class="form-group">
+            {{ form.category.label }}
+            {{ form.category }}
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary" style="flex: 1;">Update Event</button>
+            <a href="{{ url_for('manage_events') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

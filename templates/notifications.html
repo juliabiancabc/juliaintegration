@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card-custom">
+                <h3 class="mb-4">Notification Settings</h3>
+                <form method="POST">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" name="new_messages" {% if settings.new_messages %}checked{% endif %}>
+                        <label class="form-check-label">New Messages</label>
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" name="event_reminders" {% if settings.event_reminders %}checked{% endif %}>
+                        <label class="form-check-label">Event Reminders</label>
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" name="story_comments" {% if settings.story_comments %}checked{% endif %}>
+                        <label class="form-check-label">Story Comments</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary-custom">Save Settings</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,210 @@
+{% extends 'stories_base.html' %}
+
+{% block title %}Create Post - LazarusStories{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Back Button -->
+    <a href="{{ url_for('stories.list_stories') }}" class="btn btn-link text-dark p-0 mb-3">
+        <i class="bi bi-arrow-left-circle fs-4"></i>
+    </a>
+
+    <!-- page title -->
+    <h2 class="text-primary mb-4">Create Post</h2>
+
+    <form method="POST" enctype="multipart/form-data" id="createStoryForm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="row">
+            <!-- media upload -->
+            <div class="col-lg-4 mb-4">
+                <div class="media-upload-area" id="mediaUploadArea">
+                    <input type="file" name="media" id="mediaInput" multiple accept="image/*,video/*" class="d-none">
+                    <div class="upload-placeholder" id="uploadPlaceholder">
+                        <i class="bi bi-camera fs-1 text-muted"></i>
+                    </div>
+                    <div class="media-preview" id="mediaPreview"></div>
+                </div>
+                {% if errors.media %}
+                <div class="text-danger small mt-2">{{ errors.media }}</div>
+                {% endif %}
+            </div>
+
+            <!-- form fields -->
+            <div class="col-lg-8">
+                <div class="row mb-4">
+                    <!-- post button -->
+                    <div class="col-12 text-end mb-3">
+                        <button type="submit" class="btn btn-primary px-5">Post</button>
+                    </div>
+
+                    <!-- captions -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-medium">Captions</label>
+                        <div class="input-group">
+                            <input type="text" name="caption"
+                                class="form-control {% if errors.caption %}is-invalid{% endif %}"
+                                placeholder="Enter caption" value="{{ form_data.get('caption', '') }}" maxlength="120">
+                            <span class="input-group-text bg-white">
+                                <i class="bi bi-pencil text-muted"></i>
+                            </span>
+                        </div>
+                        {% if errors.caption %}
+                        <div class="text-danger small mt-1">{{ errors.caption }}</div>
+                        {% endif %}
+                        <small class="text-muted">Max 120 characters</small>
+                    </div>
+
+                    <!-- visibility function -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-medium">Visible to:</label>
+                        <div class="input-group">
+                            <select name="privacy" class="form-select {% if errors.privacy %}is-invalid{% endif %}">
+                                {% for option in privacy_options %}
+                                <option value="{{ option }}" {% if form_data.get('privacy')==option %}selected{% endif
+                                    %}>
+                                    {{ option }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <span class="input-group-text bg-white">
+                                <i class="bi bi-pencil text-muted"></i>
+                            </span>
+                        </div>
+                        {% if errors.privacy %}
+                        <div class="text-danger small mt-1">{{ errors.privacy }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- tags -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-medium">Tags</label>
+                        <div class="input-group">
+                            <input type="text" name="tags"
+                                class="form-control {% if errors.tags %}is-invalid{% endif %}" placeholder="#helping"
+                                value="{{ form_data.get('tags', '') }}">
+                            <span class="input-group-text bg-white">
+                                <i class="bi bi-geo-alt text-muted"></i>
+                            </span>
+                        </div>
+                        {% if errors.tags %}
+                        <div class="text-danger small mt-1">{{ errors.tags }}</div>
+                        {% endif %}
+                        <small class="text-muted">Separate with spaces or commas. Max 10 tags.</small>
+                    </div>
+
+                    <!-- events -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-medium">Events:</label>
+                        <div class="input-group">
+                            <input type="text" name="event_title" class="form-control"
+                                placeholder="Link to event (optional)" value="{{ form_data.get('event_title', '') }}">
+                        </div>
+                    </div>
+
+                    <!-- category -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-medium">Category</label>
+                        <select name="category" class="form-select {% if errors.category %}is-invalid{% endif %}">
+                            <option value="">Select a category</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat }}" {% if form_data.get('category')==cat %}selected{% endif %}>
+                                {{ cat }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        {% if errors.category %}
+                        <div class="text-danger small mt-1">{{ errors.category }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- allowed groups -->
+                    <div class="col-md-6 mb-3" id="allowedGroupsWrapper" style="display: none;">
+                        <label class="form-label fw-medium">Allowed Groups</label>
+                        <input type="text" name="allowed_groups"
+                            class="form-control {% if errors.allowed_groups %}is-invalid{% endif %}"
+                            placeholder="Group1, Group2, ..." value="{{ form_data.get('allowed_groups', '') }}">
+                        {% if errors.allowed_groups %}
+                        <div class="text-danger small mt-1">{{ errors.allowed_groups }}</div>
+                        {% endif %}
+                        <small class="text-muted">Comma-separated group names</small>
+                    </div>
+
+                    <!-- scheduled posting time -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-medium">Schedule Post (optional)</label>
+                        <input type="datetime-local" name="scheduled_at" class="form-control"
+                            value="{{ form_data.get('scheduled_at', '') }}">
+                    </div>
+                </div>
+
+                <!-- story description -->
+                <div class="mb-4">
+                    <label class="form-label fw-medium">Story Description</label>
+                    <textarea name="description" class="form-control {% if errors.description %}is-invalid{% endif %}"
+                        rows="6"
+                        placeholder="Share your story... (minimum 20 characters)">{{ form_data.get('description', '') }}</textarea>
+                    {% if errors.description %}
+                    <div class="text-danger small mt-1">{{ errors.description }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // handle privacy dropdown to show/hide allowed groups
+    const privacySelect = document.querySelector('select[name="privacy"]');
+    const allowedGroupsWrapper = document.getElementById('allowedGroupsWrapper');
+
+    function toggleAllowedGroups() {
+        if (privacySelect.value === 'Specific Groups') {
+            allowedGroupsWrapper.style.display = 'block';
+        } else {
+            allowedGroupsWrapper.style.display = 'none';
+        }
+    }
+
+    privacySelect.addEventListener('change', toggleAllowedGroups);
+    toggleAllowedGroups(); // initial check
+
+    // handle media upload preview
+    const mediaUploadArea = document.getElementById('mediaUploadArea');
+    const mediaInput = document.getElementById('mediaInput');
+    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+    const mediaPreview = document.getElementById('mediaPreview');
+
+    mediaUploadArea.addEventListener('click', () => mediaInput.click());
+
+    mediaInput.addEventListener('change', function () {
+        mediaPreview.innerHTML = '';
+
+        if (this.files.length > 0) {
+            uploadPlaceholder.style.display = 'none';
+
+            Array.from(this.files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    if (file.type.startsWith('image/')) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'preview-item';
+                        mediaPreview.appendChild(img);
+                    } else if (file.type.startsWith('video/')) {
+                        const video = document.createElement('video');
+                        video.src = e.target.result;
+                        video.className = 'preview-item';
+                        video.controls = true;
+                        mediaPreview.appendChild(video);
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+        } else {
+            uploadPlaceholder.style.display = 'flex';
+        }
+    });
+</script>
+{% endblock %}

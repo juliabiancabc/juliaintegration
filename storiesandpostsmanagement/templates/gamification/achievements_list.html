@@ -1,0 +1,31 @@
+{% extends 'stories_base.html' %}
+
+{% block title %}Achievements{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="text-primary mb-4">Achievements</h2>
+    <p class="text-muted">Complete these to earn badges.</p>
+    <div class="mb-3">
+        <a href="{{ url_for('stories.gamification.badge_catalog') }}" class="btn btn-outline-primary btn-sm">View Badge Catalog</a>
+    </div>
+    <ul class="list-group">
+        {% for ach in achievements %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <strong>{{ ach.title }}</strong>
+                {% if ach.description %}<br><span class="text-muted small">{{ ach.description }}</span>{% endif %}
+                <br><span class="badge bg-secondary">{{ ach.rule_type }} &ge; {{ ach.rule_value }}</span>
+            </div>
+            <div>
+                {% for bid in ach.badge_ids %}
+                <span class="badge bg-primary me-1">Badge #{{ bid }}</span>
+                {% endfor %}
+            </div>
+        </li>
+        {% else %}
+        <li class="list-group-item text-muted">No achievements defined.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

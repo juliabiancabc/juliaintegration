@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}My Calendar{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='calendar/css/calendar_bootstrap.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='calendar/css/calendar_style.css') }}">
+{% endblock %}
+
+{% block content %}
+<style>
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+    .calendar-layout { display: flex; gap: 30px; }
+    .calendar-section { flex: 1; background: white; border-radius: 10px; padding: 20px; }
+    .events-section { flex: 1; }
+    .event-list { display: flex; flex-direction: column; gap: 15px; }
+    .calendar-event { border-left: 4px solid #667eea; padding: 15px; background: #f8f9ff; border-radius: 8px; }
+    .event-date-badge { background: #667eea; color: white; padding: 8px 12px; border-radius: 6px; display: inline-block; margin-bottom: 10px; font-weight: 600; font-size: 12px; }
+    .event-details h3 { margin-bottom: 8px; color: #333; font-size: 16px; }
+    .event-meta { color: #666; margin-bottom: 6px; font-size: 13px; }
+    .no-events { text-align: center; padding: 40px; background: #f8f9ff; border-radius: 10px; }
+</style>
+
+<div class="page-header">
+    <div>
+        <h1>My Calendar 📆</h1>
+        <p style="color: #666;">Events you've registered for</p>
+    </div>
+    <a href="{{ url_for('user_dashboard') }}" class="btn btn-secondary">← Back</a>
+</div>
+
+<div class="calendar-layout">
+    <div class="calendar-section">
+        <div class="calendar">
+            <div class="year-header">
+                <span class="left-button fa fa-chevron-left" id="prev"> </span>
+                <span class="year" id="label"></span>
+                <span class="right-button fa fa-chevron-right" id="next"> </span>
+            </div>
+            <table class="months-table w-100">
+                <tbody>
+                    <tr class="months-row">
+                        <td class="month">Jan</td><td class="month">Feb</td><td class="month">Mar</td>
+                        <td class="month">Apr</td><td class="month">May</td><td class="month">Jun</td>
+                        <td class="month">Jul</td><td class="month">Aug</td><td class="month">Sep</td>
+                        <td class="month">Oct</td><td class="month">Nov</td><td class="month">Dec</td>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="days-table w-100">
+                <td class="day">Sun</td><td class="day">Mon</td><td class="day">Tue</td>
+                <td class="day">Wed</td><td class="day">Thu</td><td class="day">Fri</td>
+                <td class="day">Sat</td>
+            </table>
+            <div class="frame">
+                <table class="dates-table w-100">
+                    <tbody class="tbody"></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="events-container"></div>
+    </div>
+
+    <div class="events-section">
+        <h3 style="margin-bottom: 20px;">My Registered Events</h3>
+        {% if events %}
+        <div class="event-list">
+            {% for event in events %}
+            <div class="calendar-event">
+                <div class="event-date-badge">{{ event.date.strftime('%B %d, %Y') }} at {{ event.date.strftime('%I:%M %p') }}</div>
+                <div class="event-details">
+                    <h3>{{ event.title }}</h3>
+                    <div class="event-meta"><strong>📍</strong> {{ event.location }}</div>
+                    <div class="event-meta"><strong>📝</strong> {{ event.category|title }}</div>
+                    <p style="margin-top: 10px; color: #666; font-size: 13px;">{{ event.description }}</p>
+                </div>
+                <div style="margin-top: 10px;">
+                    <a href="{{ url_for('unregister_event', event_id=event.id) }}" class="btn btn-danger" style="font-size: 12px; padding: 6px 12px;">Unregister</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-events">
+            <div style="font-size: 48px; margin-bottom: 15px;">📅</div>
+            <h3>No Events Yet</h3>
+            <p>You haven't registered for any events.</p>
+            <a href="{{ url_for('view_events') }}" class="btn btn-primary" style="margin-top: 15px;">Browse Events</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='calendar/js/jquery.min.js') }}"></script>
+<script src="{{ url_for('static', filename='calendar/js/popper.js') }}"></script>
+<script src="{{ url_for('static', filename='calendar/js/bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static', filename='calendar/js/main.js') }}"></script>
+<script>
+$(document).ready(function() {
+    // Get registered event dates
+    var registeredDates = [
+        {% for event in events %}
+        "{{ event.date.strftime('%Y-%m-%d') }}"{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+    
+    // Highlight registered dates after calendar loads
+    setTimeout(function() {
+        registeredDates.forEach(function(dateStr) {
+            var date = new Date(dateStr);
+            var day = date.getDate();
+            $('.dates-table .tbody td').each(function() {
+                if ($(this).text() == day && !$(this).hasClass('nil')) {
+                    $(this).css({
+                        'background-color': '#667eea',
+                        'color': 'white',
+                        'font-weight': 'bold',
+                        'border-radius': '50%'
+                    });
+                }
+            });
+        });
+    }, 500);
+});
+</script>
+{% endblock %}

@@ -26,17 +26,21 @@
     </style>
 </head>
 <body>
-    <header>
-        <div class="logo"><a href="/" style="color:inherit; text-decoration:none;"><i class="fa-solid fa-asterisk"></i></a></div>
-        <nav class="nav-links">
-            <a href="/">Home</a>
-            <a href="/messaging">Messaging</a>
-            <a href="/stories">LazarusStories</a>
-            <a href="/events" class="active">Events</a>
-            <a href="/community">Community</a>
-        </nav>
-        <div style="width: 50px;"></div>
-    </header>
+<header style="display: flex; align-items: center; justify-content: space-between; padding: 15px 40px; background: white; border-bottom: 1px solid #eee; height: 70px;">
+    <div style="font-size: 24px; color: #5b5FEF;">
+        <a href="/" style="color:inherit; text-decoration:none;">
+            <i class="fa-solid fa-asterisk"></i>
+        </a>
+    </div>
+    <nav style="display: flex; gap: 30px;">
+        <a href="/" style="text-decoration: none; color: #444; font-weight: 500; font-size: 14px;">Home</a>
+        <a href="/messaging/home" style="text-decoration: none; color: #444; font-weight: 500; font-size: 14px;">Messaging</a>
+        <a href="/stories" style="text-decoration: none; color: #444; font-weight: 500; font-size: 14px;">LazarusStories</a>
+        <a href="/events/list" style="text-decoration: none; color: #5b5FEF; font-weight: 500; font-size: 14px;">Events</a>
+        <a href="/community" style="text-decoration: none; color: #444; font-weight: 500; font-size: 14px;">Community</a>
+    </nav>
+    <div style="width: 50px;"></div>
+</header>
 
     <div class="container">
         {% if session.user_type == 'moderator' %}

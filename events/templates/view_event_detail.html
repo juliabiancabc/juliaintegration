@@ -112,11 +112,11 @@
 <div class="page-layout">
     <div class="sidebar">
         <div class="sidebar-title">Event Navigation</div>
-        <a href="{{ url_for('manage_events') }}" class="sidebar-item {% if request.endpoint in ['manage_events', 'create_event', 'view_event_detail', 'edit_event'] %}active{% endif %}" style="text-decoration: none;">
+        <a href="{{ url_for('events.manage_events') }}" class="sidebar-item {% if request.endpoint in ['manage_events', 'create_event', 'view_event_detail', 'edit_event'] %}active{% endif %}" style="text-decoration: none;">
     <span>📋</span>
     <span>Manage Events</span>
 </a>
-<a href="{{ url_for('attendee_insights') }}" class="sidebar-item {% if request.endpoint == 'attendee_insights' %}active{% endif %}" style="text-decoration: none;">
+<a href="{{ url_for('events.attendee_insights') }}" class="sidebar-item {% if request.endpoint == 'attendee_insights' %}active{% endif %}" style="text-decoration: none;">
     <span>📊</span>
     <span>Attendee Insights</span>
 </a>
@@ -125,17 +125,17 @@
     <div class="main-area">
         <div class="top-bar">
             <div class="section-title">
-                <a href="{{ url_for('manage_events') }}" class="back-btn">←</a>
+                <a href="{{ url_for('events.manage_events') }}" class="back-btn">←</a>
                 <span>Event Details</span>
             </div>
             <div class="button-group">
                 <button type="submit" form="editEventForm" class="save-button">Save</button>
-                <a href="{{ url_for('delete_event', event_id=event.id) }}" class="cancel-button" 
+                <a href="{{ url_for('events.delete_event', event_id=event.id) }}" class="cancel-button" 
                    onclick="return confirm('Are you sure you want to delete this event?')">Delete</a>
             </div>
         </div>
 
-        <form method="POST" action="{{ url_for('update_event_detail', event_id=event.id) }}" id="editEventForm" enctype="multipart/form-data">
+        <form method="POST" action="{{ url_for('events.update_event_detail', event_id=event.id) }}" id="editEventForm" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="">
 
             <label for="imageUpload" class="event-image-box" style="cursor: pointer; position: relative; overflow: hidden;">

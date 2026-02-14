@@ -251,12 +251,13 @@ def view_calendar():
     # Convert to list of dicts for JSON serialization
     events_list = []
     for event in events:
+        # Handle sqlite3.Row which doesn't have .get() method
         events_list.append({
             'id': event['id'],
             'title': event['title'],
             'date': event['date'],
             'location': event['location'],
-            'category': event.get('category', ''),
+            'category': event['category'] if 'category' in event.keys() else '',
             'creator_name': event['creator_name']
         })
     
@@ -487,7 +488,9 @@ def register_event(event_id):
         return redirect(url_for('events.browse_events'))
     
     # Check max participants (seat_amount)
-    if event.get('seat_amount'):
+    # Handle sqlite3.Row which doesn't have .get() method
+    seat_amount = event['seat_amount'] if 'seat_amount' in event.keys() else None
+    if seat_amount:
         current_count = conn.execute('''
             SELECT COUNT(*) as count FROM event_registrations WHERE event_id = ?
         ''', (event_id,)).fetchone()['count']
@@ -714,7 +717,7 @@ def export_events():
             event['description'],
             event[date_col],
             event['location'],
-            event.get('category', 'N/A'),
+            event['category'] if 'category' in event.keys() else 'N/A',
             event['participant_count'],
             event['creator_name']
         ])
